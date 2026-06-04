@@ -5,8 +5,9 @@
 1. **MCP `create_branch_worktree`** – create branch + worktree
 2. **MCP `opencode_run`** – run/continue opencode session
 3. **todowrite**, **webfetch**
+4. **bash** - only for copy `project-opencode.json`.
 
-All other tools **forbidden** (Read, Write, Glob, Grep, task, skill, test_checklist, bash).
+All other tools **forbidden** (Read, Write, Glob, Grep, task, skill, test_checklist).
 
 Remember to use quote to make sure the parameter is correctly passed to MCP `create_branch_worktree` and MCP `opencode_run`.
 

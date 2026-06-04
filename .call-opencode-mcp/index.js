@@ -17,9 +17,9 @@ const server = new Server(
 
 const OPENCODE_EXE = 'C:\\Users\\22786\\AppData\\Roaming\\npm\\node_modules\\opencode-ai\\bin\\opencode.exe';
 
-function runCmd(script) {
+function runGit(repoDir, args) {
   return new Promise((resolve, reject) => {
-    const child = spawn('cmd.exe', ['/c', script], { windowsHide: true });
+    const child = spawn('git', args, { cwd: repoDir, windowsHide: true });
     let stdout = '';
     let stderr = '';
     child.stdout.on('data', d => stdout += d.toString());
@@ -97,12 +97,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     let r;
 
-    r = await runCmd(`git -C "${repoDir}" rev-parse --git-dir 2>&1`);
+    r = await runGit(repoDir, ['rev-parse', '--git-dir']);
     if (r.code !== 0) {
       throw new McpError(ErrorCode.InternalError, `Not a git repository: ${repoDir}`);
     }
 
-    r = await runCmd(`git -C "${repoDir}" branch -r 2>nul`);
+    r = await runGit(repoDir, ['branch', '-r']);
     let remotes = r.stdout || '';
     let defaultBranch = remotes.includes('origin/main') ? 'main'
       : remotes.includes('origin/master') ? 'master'
@@ -110,14 +110,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       : null;
 
     if (!defaultBranch) {
-      r = await runCmd(`git -C "${repoDir}" symbolic-ref refs/remotes/origin/HEAD 2>nul`);
+      r = await runGit(repoDir, ['symbolic-ref', 'refs/remotes/origin/HEAD']);
       const match = r.stdout.match(/origin\/(.+)/);
       if (match) defaultBranch = match[1].trim();
     }
 
     if (!defaultBranch) {
       for (const b of ['main', 'master', 'dev']) {
-        r = await runCmd(`git -C "${repoDir}" rev-parse --verify "${b}" 2>nul`);
+        r = await runGit(repoDir, ['rev-parse', '--verify', b]);
         if (r.code === 0) { defaultBranch = b; break; }
       }
     }
@@ -126,13 +126,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       throw new McpError(ErrorCode.InternalError, 'Could not detect default branch (main/master/dev)');
     }
 
-    r = await runCmd(`git -C "${repoDir}" branch --list "${branch}" 2>nul`);
+    r = await runGit(repoDir, ['branch', '--list', branch]);
     const branchExists = r.stdout.trim().length > 0;
 
     if (branchExists) {
-      r = await runCmd(`git -C "${repoDir}" worktree add "${worktreeDir}" "${branch}" 2>&1`);
+      r = await runGit(repoDir, ['worktree', 'add', worktreeDir, branch]);
     } else {
-      r = await runCmd(`git -C "${repoDir}" worktree add -b "${branch}" "${worktreeDir}" "${defaultBranch}" 2>&1`);
+      r = await runGit(repoDir, ['worktree', 'add', '-b', branch, worktreeDir, defaultBranch]);
     }
     if (r.code !== 0) {
       throw new McpError(ErrorCode.InternalError,
