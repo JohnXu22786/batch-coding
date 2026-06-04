@@ -1,0 +1,10 @@
+{
+  "name": "batch-prompt-mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "MCP tools for batch-prompt workflow: create branch/worktree & run opencode",
+  "main": "index.js",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.15.0"
+  }
+}

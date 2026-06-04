@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "batch-prompt": {
+      "command": "node",
+      "args": ["D:\\Administrator\\Desktop\\OpenCode Batch\\opencode-mcp\\index.js"]
+    }
+  }
+}
