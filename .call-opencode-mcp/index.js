@@ -16,6 +16,7 @@ const server = new Server(
 );
 
 const OPENCODE_EXE = 'C:\\Users\\22786\\AppData\\Roaming\\npm\\node_modules\\opencode-ai\\bin\\opencode.exe';
+const BATCH_DIR = path.resolve(path.dirname(process.argv[1]), '..');
 
 function runGit(repoDir, args) {
   return new Promise((resolve, reject) => {
@@ -159,8 +160,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         `Directory does not exist: ${worktreePath} (resolved: ${resolvedPath})`);
     }
 
-    if (fs.existsSync('project-opencode.json')) {
-      fs.copyFileSync('project-opencode.json', path.join(resolvedPath, 'opencode.json'));
+    const src = path.join(BATCH_DIR, 'project-opencode.json');
+    const dest = path.join(resolvedPath, 'opencode.json');
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, dest);
     }
 
     const { stdout, stderr, code } = await runOpenCode(worktreePath, instruction, existingSessionId);
