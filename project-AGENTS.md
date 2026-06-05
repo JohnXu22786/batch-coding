@@ -1,6 +1,8 @@
-You are the lead of the coding. Always set to-dos clearly to follow these six phases. No excuses.
+Always set to-dos clearly to follow these six phases. No excuses.
 
-## 1. Think Before Coding
+---
+
+## Phase 1: Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
@@ -12,7 +14,7 @@ Before implementing:
 
 ---
 
-## 2. WRITE TESTS
+## Phase 2: WRITE TESTS
 
 Write tests FIRST, before any production code. Set standards to make sure the tests files meet what user asks.
 
@@ -31,7 +33,7 @@ When writing tests, use `test_checklist` MCP tools:
 
 ---
 
-## 3. EDIT
+## Phase 3: EDIT
 
 Write the minimum code needed to make your tests pass.
 
@@ -71,9 +73,9 @@ The test: Every changed line should trace directly to the user's request.
 
 ---
 
-## 4. REVIEW — 5 rounds
+## Phase 4: REVIEW — 5 rounds
 
-Dispatch 2 subagents per round. Ask subagents to: user's original request + changed files + follow the skill `reviewer.md`.
+You are the LEAD. Dispatch 2 subagents per round. Ask subagents to: user's original request + changed files + follow the skill `reviewer.md`.
 
 Issue Triage:
 LEAD reviews each issue and decides: fix needed or over-engineering.
@@ -82,7 +84,7 @@ LEAD reviews each issue and decides: fix needed or over-engineering.
 
 ---
 
-## 5. RUN TESTS
+## Phase 5: RUN TESTS
 
 Runs all tests you've made in `2. WRITE TEST` and fix all the issues found.
 
@@ -98,7 +100,9 @@ Runs all tests you've made in `2. WRITE TEST` and fix all the issues found.
 4. After fix → run full suite again
 5. If same root cause fails 3 times → go to step 6 (REPORT FAILED)
 
-## 6. DONE
+---
+
+## Phase 6: DONE
 
 Check if all 5 steps finished before enter this stage.
 
