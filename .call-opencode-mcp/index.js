@@ -16,7 +16,7 @@ const server = new Server(
 );
 
 const OPENCODE_EXE = 'C:\\Users\\22786\\AppData\\Roaming\\npm\\node_modules\\opencode-ai\\bin\\opencode.exe';
-const BATCH_DIR = path.resolve(path.dirname(process.argv[1]), '..');
+const BATCH_DIR = process.cwd();
 
 function runGit(repoDir, args) {
   return new Promise((resolve, reject) => {
