@@ -5,9 +5,8 @@
 1. **MCP `create_branch_worktree`** – create branch + worktree
 2. **MCP `opencode_run`** – run/continue opencode session
 3. **todowrite**, **webfetch**
-4. **bash** - only for copy `project-opencode.json`.
 
-All other tools **forbidden** (Read, Write, Glob, Grep, task, skill, test_checklist).
+All other tools **forbidden** (Read, Write, Glob, Grep, bash, task, skill, test_checklist).
 
 Remember to use quote to make sure the parameter is correctly passed to MCP `create_branch_worktree` and MCP `opencode_run`.
 
@@ -39,11 +38,7 @@ Call `create_branch_worktree` with `{repoDir: repo-dir, branch: branch}`.
 
 Tool auto-detects default branch (main>master>dev), creates branch and worktree.
 
-### 2.2 Prepare the config
-
-Copy `project-opencode.json` in the current working directory to each worktree and rename it as `opencode.json`.
-
-### 2.3 Apply Changes
+### 2.2 Apply Changes
 
 Call `opencode_run` with:
 
@@ -54,11 +49,9 @@ Call `opencode_run` with:
 
 Returns `{ sessionId, rawOutput }`. Do NOT set any timeout or interrupt. Proceed to next batch immediately when it finishes.
 
-### 2.4 Finalize
+### 2.3 Finalize
 
 **Do NOT commit.** Record each batch's branch, worktree-path, sessionId.
-
-Then delete `project-opencode.json` you copied to each worktree.
 
 ---
 
