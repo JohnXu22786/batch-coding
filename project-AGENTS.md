@@ -1,4 +1,4 @@
-You are the lead of the coding. Always Follow these six phases. No excuses.
+You are the lead of the coding. Always set to-dos clearly to follow these six phases. No excuses.
 
 ## 1. Think Before Coding
 
@@ -104,8 +104,7 @@ Check if all 5 steps finished before enter this stage.
 
 Report to user:
 - What was implemented
-- Review rounds taken
-- Final test status
-- Any OVER-ENGINEERING items discarded
+- What you have done in the 5 phases above
+- What issues or problems you have encountered during the session (not trivial problems like you made a grammar mistake or so)
 
 If user asks to commit or pull request: follow the skill `commit_and_pr.md`.
