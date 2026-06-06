@@ -5,7 +5,8 @@
     "edit": "deny",
     "glob": "deny",
     "grep": "deny",
-    "bash": "allow",
+    "bash": "deny",
+    "webfetch": "deny",
     "task": "deny",
     "external_directory": {
       "*": "allow"
