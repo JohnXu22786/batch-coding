@@ -65,5 +65,5 @@ Batch A:
 - Worktree:
 - Session ID:
 - Status:
-- Continue: `opencode run {worktree-path} --session ses_xxxx --instruction "<follow-up>"`
+- Continue: `opencode --session ses_xxxx`
 ```

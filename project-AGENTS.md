@@ -1,4 +1,4 @@
-Always set to-dos clearly to follow these six phases. No excuses.
+Always set to-dos clearly to follow these six phases. No excuses. 
 
 ---
 
@@ -75,7 +75,7 @@ The test: Every changed line should trace directly to the user's request.
 
 ## Phase 4: REVIEW — 5 rounds
 
-You are the LEAD. Dispatch 2 subagents per round. Ask subagents to: user's original request + changed files + follow the skill `reviewer.md`.
+You are the LEAD. Dispatch 2 subagents per round for 5 rounds. Ask subagents to: user's original request + changed files + follow the skill `reviewer.md`.
 
 Issue Triage:
 LEAD reviews each issue and decides: fix needed or over-engineering.
@@ -108,7 +108,7 @@ Check if all 5 steps finished before enter this stage.
 
 Report to user:
 - What was implemented
-- What you have done in the 5 phases above
+- What you have done in the 5 phases above, and whether you have followed these in the right order
 - What issues or problems you have encountered during the session (not trivial problems like you made a grammar mistake or so)
 
 If user asks to commit or pull request: follow the skill `commit-and-pr`.
