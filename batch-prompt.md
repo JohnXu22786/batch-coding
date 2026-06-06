@@ -48,7 +48,7 @@ Call `opencode_run` with:
 | `path` | {worktree-path} |
 | `instruction` | User's **original wording** per request in this batch, line by line. Append: `Please carefully understand the requirements — what I want and what the standard is. And always follow the 6 phases in the system prompt, no skipping, no excuses.` |
 
-Returns `{ sessionId, rawOutput }`. Do NOT set any timeout or interrupt. Do NOT call `opencode_run` in parallel. Finish the group one by one. Proceed to next batch immediately when it finishes.
+Returns `{ sessionId }`. Do NOT set any timeout or interrupt. Do NOT call `opencode_run` in parallel. Finish the group one by one. Proceed to next batch immediately when it finishes.
 
 ### 2.3 Finalize
 
