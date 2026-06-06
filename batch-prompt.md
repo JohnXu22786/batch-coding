@@ -14,7 +14,8 @@ Remember to use quote to make sure the parameter is correctly passed to MCP `cre
 
 ## Phase 1: Group Requests
 
-Group user's requests by semantic similarity. Do NOT pre-check files or read the project yourself.
+Group user's requests by semantic similarity. 
+Do NOT pre-check files or read the project yourself. You just dispatch. You don't have to understand the project.
 - Same feature => one batch
 - Obvious dependency => one batch
 - Unrelated => separate batches
