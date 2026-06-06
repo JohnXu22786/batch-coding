@@ -15,6 +15,8 @@ const server = new Server(
   { capabilities: { tools: {} } }
 );
 
+let opencodeRunning = false;
+
 const OPENCODE_EXE = 'C:\\Users\\22786\\AppData\\Roaming\\npm\\node_modules\\opencode-ai\\bin\\opencode.exe';
 const BATCH_DIR = path.resolve(path.dirname(process.argv[1]), '..');
 
@@ -149,6 +151,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   if (name === "opencode_run") {
+    if (opencodeRunning) {
+      throw new McpError(ErrorCode.InternalError,
+        'opencode_run is already in progress. Wait for it to finish before starting another. Do NOT call opencode_run in parallel.');
+    }
+
     const { path: worktreePath, instruction, sessionId: existingSessionId } = args;
     if (!worktreePath || !instruction) {
       throw new McpError(ErrorCode.InvalidParams, "path and instruction are required");
@@ -184,26 +191,31 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       copyDir(skillsSrc, skillsDest);
     }
 
-    const { stdout, stderr, code } = await runOpenCode(worktreePath, instruction, existingSessionId);
-    if (code !== 0) {
-      throw new McpError(ErrorCode.InternalError,
-        `opencode_run failed (exit ${code}): ${(stderr || stdout).substring(0, 2000)}`);
-    }
+    opencodeRunning = true;
+    try {
+      const { stdout, stderr, code } = await runOpenCode(worktreePath, instruction, existingSessionId);
+      if (code !== 0) {
+        throw new McpError(ErrorCode.InternalError,
+          `opencode_run failed (exit ${code}): ${(stderr || stdout).substring(0, 2000)}`);
+      }
 
-    let sessionId = existingSessionId || '';
-    for (const line of stdout.split('\n')) {
-      try {
-        const evt = JSON.parse(line);
-        if (!existingSessionId && evt.sessionID) sessionId = evt.sessionID;
-      } catch (e) {}
-    }
+      let sessionId = existingSessionId || '';
+      for (const line of stdout.split('\n')) {
+        try {
+          const evt = JSON.parse(line);
+          if (!existingSessionId && evt.sessionID) sessionId = evt.sessionID;
+        } catch (e) {}
+      }
 
-    return {
-      content: [{
-        type: "text",
-        text: JSON.stringify({ sessionId })
-      }]
-    };
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ sessionId })
+        }]
+      };
+    } finally {
+      opencodeRunning = false;
+    }
   }
 
   throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
