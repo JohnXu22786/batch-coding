@@ -166,6 +166,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       fs.copyFileSync(src, dest);
     }
 
+    const skillsSrc = path.join(BATCH_DIR, '.opencode', 'skills');
+    const skillsDest = path.join(resolvedPath, '.opencode', 'skills');
+    if (fs.existsSync(skillsSrc)) {
+      function copyDir(srcDir, destDir) {
+        fs.mkdirSync(destDir, { recursive: true });
+        for (const entry of fs.readdirSync(srcDir)) {
+          const s = path.join(srcDir, entry);
+          const d = path.join(destDir, entry);
+          if (fs.statSync(s).isDirectory()) {
+            copyDir(s, d);
+          } else {
+            fs.copyFileSync(s, d);
+          }
+        }
+      }
+      copyDir(skillsSrc, skillsDest);
+    }
+
     const { stdout, stderr, code } = await runOpenCode(worktreePath, instruction, existingSessionId);
     if (code !== 0) {
       throw new McpError(ErrorCode.InternalError,

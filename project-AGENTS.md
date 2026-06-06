@@ -111,4 +111,4 @@ Report to user:
 - What you have done in the 5 phases above
 - What issues or problems you have encountered during the session (not trivial problems like you made a grammar mistake or so)
 
-If user asks to commit or pull request: follow the skill `commit_and_pr.md`.
+If user asks to commit or pull request: follow the skill `commit-and-pr`.
