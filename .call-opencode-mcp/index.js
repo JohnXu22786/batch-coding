@@ -191,21 +191,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     let sessionId = existingSessionId || '';
-    let rawOutput = '';
     for (const line of stdout.split('\n')) {
       try {
         const evt = JSON.parse(line);
         if (!existingSessionId && evt.sessionID) sessionId = evt.sessionID;
-        if (evt.type === 'text' && evt.part && evt.part.text) {
-          rawOutput += evt.part.text + '\n';
-        }
       } catch (e) {}
     }
 
     return {
       content: [{
         type: "text",
-        text: JSON.stringify({ sessionId, rawOutput: rawOutput.trim() })
+        text: JSON.stringify({ sessionId })
       }]
     };
   }
