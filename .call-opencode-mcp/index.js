@@ -105,28 +105,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       throw new McpError(ErrorCode.InternalError, `Not a git repository: ${repoDir}`);
     }
 
-    r = await runGit(repoDir, ['branch', '-r']);
-    let remotes = r.stdout || '';
-    let defaultBranch = remotes.includes('origin/main') ? 'main'
-      : remotes.includes('origin/master') ? 'master'
-      : remotes.includes('origin/dev') ? 'dev'
-      : null;
+    r = await runGit(repoDir, ['symbolic-ref', 'refs/remotes/origin/HEAD']);
+    let defaultBranch = null;
+    const match = r.stdout.match(/origin\/(.+)/);
+    if (match) defaultBranch = match[1].trim();
 
-    if (!defaultBranch) {
-      r = await runGit(repoDir, ['symbolic-ref', 'refs/remotes/origin/HEAD']);
-      const match = r.stdout.match(/origin\/(.+)/);
-      if (match) defaultBranch = match[1].trim();
+    if (!defaultBranch && r.code !== 0) {
+      r = await runGit(repoDir, ['remote', 'show', 'origin']);
+      const m = r.stdout.match(/HEAD branch:\s*(.+)/);
+      if (m) defaultBranch = m[1].trim();
     }
 
     if (!defaultBranch) {
-      for (const b of ['main', 'master', 'dev']) {
-        r = await runGit(repoDir, ['rev-parse', '--verify', b]);
-        if (r.code === 0) { defaultBranch = b; break; }
-      }
-    }
-
-    if (!defaultBranch) {
-      throw new McpError(ErrorCode.InternalError, 'Could not detect default branch (main/master/dev)');
+      throw new McpError(ErrorCode.InternalError, 'Could not detect default branch from remote');
     }
 
     r = await runGit(repoDir, ['branch', '--list', branch]);
