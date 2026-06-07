@@ -52,7 +52,9 @@ Returns `{ sessionId }` when the tool finishes. Do NOT set any timeout or interr
 
 ### 2.3 Finalize
 
-**Do NOT commit.** Record each batch's branch, worktree-path, sessionId. Report the sessionId immediately when each group's `opencode_run` finishes, then proceed to next group or report.
+Record each batch's branch, worktree-path, sessionId. 
+
+Report the sessionId immediately when each group's `opencode_run` finishes, then proceed to next group or report.
 
 ---
 
