@@ -48,13 +48,13 @@ Call `opencode_run` with:
 | `path` | {worktree-path} |
 | `instruction` | User's **original wording** per request in this batch, line by line. Append: `Please carefully understand the requirements — what I want and what the standard is. And always follow the 6 phases in the system prompt, no skipping, no excuses.` |
 
-Returns `{ sessionId }` when the tool finishes. Do NOT set any timeout or interrupt. Do NOT call `opencode_run` in parallel. Finish the group one by one. Proceed to next batch immediately when it finishes.
+Returns `{sessionId}` when the tool finishes. Do NOT set any timeout or interrupt. Do NOT call `opencode_run` in parallel. Finish the group one by one. Proceed to next batch immediately when it finishes.
 
 ### 2.3 Finalize
 
 Record each batch's branch, worktree-path, sessionId. 
 
-Report the sessionId immediately when each group's `opencode_run` finishes, then proceed to next group or report.
+Report the `cd {worktree-path} && opencode --session {sessionId}` immediately when each group's `opencode_run` finishes, then proceed to next group or report.
 
 ---
 
@@ -66,5 +66,5 @@ Batch A:
 - Branch:
 - Worktree:
 - Session ID:
-- Continue: `opencode --session ses_xxxx`
+- Continue: `cd {worktree-path} && opencode --session {sessionId}`
 ```
