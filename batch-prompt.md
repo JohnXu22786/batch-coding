@@ -62,7 +62,7 @@ Returns `{sessionId}` when the tool finishes. Do NOT set any timeout or interrup
 
 Record each batch's branch, worktree-path, sessionId. 
 
-Report the `cd {worktree-path} && opencode --session {sessionId}` immediately when each group's `opencode_run` finishes, then proceed to next group or report.
+Report the `opencode {worktree-path} --session {sessionId}` immediately when each group's `opencode_run` finishes, then proceed to next group or report.
 
 ---
 
@@ -74,5 +74,5 @@ Batch A:
 - Branch:
 - Worktree:
 - Session ID:
-- Continue: `cd {worktree-path} && opencode --session {sessionId}`
+- Continue: `opencode {worktree-path} --session {sessionId}`
 ```
