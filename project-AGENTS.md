@@ -53,6 +53,8 @@ Write the minimum code needed to make your tests pass.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
+If your changes make the single code file big, take it apart. No large files.
+
 **Surgical Changes**
 
 **Touch only what you must. Clean up only your own mess.**
@@ -69,13 +71,13 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-**Data Migration:** When a schema/format change is approved, migrate old data automatically on first use. New format only — no compatibility layer. Migration must be idempotent and atomic where possible.
+**Data Migration:** Design a data migration if old data format cannot match new design. New format only — no compatibility layer. Migration must be idempotent and atomic where possible.
 
 ---
 
 ## Phase 4: REVIEW — 5 rounds
 
-You are the LEAD. Dispatch 2 subagents per round for 5 rounds. Ask subagents to: user's original request + changed files + follow the skill `reviewer.md`.
+You are the LEAD. Dispatch 2 subagents per round for 5 rounds. Set the subagents to `reviewer`.
 
 Issue Triage:
 LEAD reviews each issue and decides: fix needed or over-engineering.
