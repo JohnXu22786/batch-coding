@@ -109,7 +109,7 @@ Runs all tests you've made in `2. WRITE TEST` and fix all the issues found.
 Check if all 5 steps finished before enter this stage.
 
 Report to user:
-- What was implemented
+- What was implemented, how function will work
 - What you have done in the 5 phases above, and whether you have followed these in the right order
 - What issues or problems you have encountered during the session (not trivial problems like you made a grammar mistake or so)
 

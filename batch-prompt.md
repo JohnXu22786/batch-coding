@@ -70,9 +70,6 @@ Report the `opencode {worktree-path} --session {sessionId}` immediately when eac
 
 ```
 Batch A:
-- Description:
-- Branch:
-- Worktree:
-- Session ID:
+- Instruction:
 - Continue: `opencode {worktree-path} --session {sessionId}`
 ```
