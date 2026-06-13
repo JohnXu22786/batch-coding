@@ -164,22 +164,29 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       fs.copyFileSync(src, dest);
     }
 
+    function copyDir(srcDir, destDir) {
+      fs.mkdirSync(destDir, { recursive: true });
+      for (const entry of fs.readdirSync(srcDir)) {
+        const s = path.join(srcDir, entry);
+        const d = path.join(destDir, entry);
+        if (fs.statSync(s).isDirectory()) {
+          copyDir(s, d);
+        } else {
+          fs.copyFileSync(s, d);
+        }
+      }
+    }
+
     const skillsSrc = path.join(BATCH_DIR, '.opencode', 'skills');
     const skillsDest = path.join(resolvedPath, '.opencode', 'skills');
     if (fs.existsSync(skillsSrc)) {
-      function copyDir(srcDir, destDir) {
-        fs.mkdirSync(destDir, { recursive: true });
-        for (const entry of fs.readdirSync(srcDir)) {
-          const s = path.join(srcDir, entry);
-          const d = path.join(destDir, entry);
-          if (fs.statSync(s).isDirectory()) {
-            copyDir(s, d);
-          } else {
-            fs.copyFileSync(s, d);
-          }
-        }
-      }
       copyDir(skillsSrc, skillsDest);
+    }
+
+    const agentSrc = path.join(BATCH_DIR, '.opencode', 'agent');
+    const agentDest = path.join(resolvedPath, '.opencode', 'agent');
+    if (fs.existsSync(agentSrc)) {
+      copyDir(agentSrc, agentDest);
     }
 
     opencodeRunning = true;

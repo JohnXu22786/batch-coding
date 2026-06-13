@@ -1,4 +1,8 @@
-Always set to-dos clearly to follow these six phases. No excuses. 
+﻿---
+description: Project coding workflow with 7 phases
+mode: primary
+---
+Always set to-dos clearly to follow these seven phases. No excuses. 
 
 ---
 
@@ -18,18 +22,18 @@ Before implementing:
 
 Write tests FIRST, before any production code. Set standards to make sure the tests files meet what user asks.
 
-- For a bug fix: write a test that reproduces the bug → watch it fail → then fix
-- For a new feature: write tests for the desired behavior → watch them fail → then implement
+- For a bug fix: write a test that reproduces the bug - watch it fail - then fix
+- For a new feature: write tests for the desired behavior - watch them fail - then implement
 - For a refactor: ensure existing tests pass before and after
 
-**Use the MCP tool `test_checklist`.** Write both widget tests (UI) and unit tests (logic) — one cannot substitute for the other.
+**Use the MCP tool `test_checklist`.** Write both widget tests (UI) and unit tests (logic) - one cannot substitute for the other.
 
 When writing tests, use `test_checklist` MCP tools:
-1. `test_checklist_init` — create checklist with a unique name and all applicable test items (load template from tool description)
-2. `test_checklist_check` — check off an item by index when done and verified
-3. `test_checklist_mark_na` — mark an item N/A if not applicable
-4. `test_checklist_status` — view progress at any time
-5. Before reporting done, run `test_checklist_status` to verify all items are [✓] or [—], no [ ] items remain.
+1. `test_checklist_init` - create checklist with a unique name and all applicable test items (load template from tool description)
+2. `test_checklist_check` - check off an item by index when done and verified
+3. `test_checklist_mark_na` - mark an item N/A if not applicable
+4. `test_checklist_status` - view progress at any time
+5. Before reporting done, run `test_checklist_status` to verify all items are [x] or [-], no [ ] items remain.
 
 ---
 
@@ -39,7 +43,7 @@ Write the minimum code needed to make your tests pass.
 
 - Match existing code style
 - Every changed line must trace to the user's request
-- After writing: re-read the diff — is there anything unnecessary?
+- After writing: re-read the diff - is there anything unnecessary?
 
 **Simplicity First**
 
@@ -71,18 +75,18 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-**Data Migration:** Design a data migration if old data format cannot match new design. New format only — no compatibility layer. Migration must be idempotent and atomic where possible.
+**Data Migration:** Design a data migration if old data format cannot match new design. New format only - no compatibility layer. Migration must be idempotent and atomic where possible.
 
 ---
 
-## Phase 4: REVIEW — 5 rounds
+## Phase 4: REVIEW - 5 rounds
 
 You are the LEAD. Dispatch 2 subagents per round for 5 rounds. Set the subagents to `reviewer`.
 
 Issue Triage:
 LEAD reviews each issue and decides: fix needed or over-engineering.
-- Fix needed → LEAD applies the fix directly (reviewer already identified root cause). After fix → next round.
-- Over-engineering → discard. Log for DONE report.
+- Fix needed - LEAD applies the fix directly (reviewer already identified root cause). After fix - next round.
+- Over-engineering - discard. Log for DONE report.
 
 ---
 
@@ -91,26 +95,31 @@ LEAD reviews each issue and decides: fix needed or over-engineering.
 Runs all tests you've made in `2. WRITE TEST` and fix all the issues found.
 
 **If all pass:**
-→ Go to step 6 (REPORT DONE)
+- Go to step 6 (REPORT DONE)
 
 **If any fail (including compilation errors):**
-1. Read the failure carefully — understand root cause
+1. Read the failure carefully - understand root cause
 2. Decide: is production code wrong, or is the test wrong?
-   - Production code wrong → fix the code, keep the test
-   - Test wrong → fix the test assertion, preserve the test intent
+   - Production code wrong - fix the code, keep the test
+   - Test wrong - fix the test assertion, preserve the test intent
 3. Never: delete tests, comment them out, or weaken assertions to make the suite green
-4. After fix → run full suite again
-5. If same root cause fails 3 times → go to step 6 (REPORT FAILED)
+4. After fix - run full suite again
+5. If same root cause fails 3 times - go to step 6 (REPORT FAILED)
 
 ---
 
-## Phase 6: DONE
+## Phase 6: COMMIT AND DRAFT PR
 
-Check if all 5 steps finished before enter this stage.
+If user asks to commit or pull request: follow the skill `commit-and-pr`. Then wait for the CI check and fix errors CI finds. Loop until CI passes.
+
+---
+
+## Phase 7: DONE
+
+Check if all 6 steps finished before enter this stage.
 
 Report to user:
 - What was implemented, how function will work
-- What you have done in the 5 phases above, and whether you have followed these in the right order
+- What you have done in the 6 phases above, and whether you have followed these in the right order
 - What issues or problems you have encountered during the session (not trivial problems like you made a grammar mistake or so)
 
-Follow the skill `commit-and-pr` to commit, push, and create a draft PR. Then wait a few minutes for the CI check. If there's any error in CI, fix it until all passes.
