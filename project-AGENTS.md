@@ -113,4 +113,4 @@ Report to user:
 - What you have done in the 5 phases above, and whether you have followed these in the right order
 - What issues or problems you have encountered during the session (not trivial problems like you made a grammar mistake or so)
 
-If user asks to commit or pull request: follow the skill `commit-and-pr`.
+Follow the skill `commit-and-pr` to commit, push, and create a draft PR. Then wait a few minutes for the CI check. If there's any error in CI, fix it until all passes.
