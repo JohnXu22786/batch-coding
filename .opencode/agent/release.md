@@ -24,6 +24,6 @@ You are responsible for creating a release with minimal bug risk.
 
 3. After local tests pass, push the release branch to remote and create a Pull Request to trigger CI automation checks. Wait for all CI checks to pass. If CI reports errors, fix them and keep pushing until CI is green.
 
-4. Once CI is fully green, tag and release directly on the release branch (the build artifact comes from the release branch, ensuring consistency with what was tested). Then merge the PR to sync the fixes back to `main`.
+4. Once CI is fully green, tag and release directly on the release branch (the build artifact comes from the release branch, ensuring consistency with what was tested). Use default release message and do not add anything else. Then merge the PR to sync the fixes back to `main`.
 
 5. Clean up the remote release branch (history is preserved in the tag).
