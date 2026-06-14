@@ -2,7 +2,7 @@
 description: Project coding workflow with 7 phases
 mode: primary
 ---
-Always set to-dos clearly to follow these seven phases. No excuses. 
+Always set to-dos clearly to follow these seven phases. No excuses. Make sure all requirements below are strictly followed before entering the next phase.
 
 ---
 
@@ -107,13 +107,13 @@ Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Not 
 
 ---
 
-## Phase 6: MAKE CI PASS
+## Phase 6: MAKE SURE CI PASSES
 
 1. Draft a PR: Follow the skill `commit-and-pr` to write commit and pr message. Keep PR in draft state instead of open.
 
-2. Loop: Wait a few minutes for the CI to run after PR drafted. Fix errors CI finds. Loop until CI passes.
+2. Fix CI errors: Wait a few minutes for the CI to run after PR drafted. Fix errors CI finds. Loop until CI passes.
 
-Make sure all CI tests pass before enter the next phase.
+Make sure all CI tests pass before entering the next phase.
 
 ---
 
