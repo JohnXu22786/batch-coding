@@ -41,27 +41,44 @@ You are responsible for creating a release with minimal bug risk.
 
    Wait for all CI checks to pass. If CI fails, fix and keep pushing until green.
 
-4. Once CI is fully green, tag and release directly on the release branch (the build artifact comes from the release branch, ensuring consistency with what was tested). Use default release message and do not add anything else. Then merge the PR to sync the fixes back to `main`.
+4. Once CI is fully green, **tag and release on the release branch** (build artifact comes from the release branch, consistent with what was tested). Then merge the PR to sync the fixes back to `main`.
+
+   **Use GPG-signed tags (`git tag -s`) to get "Verified" on GitHub.** Annotated tags (`git tag -a`) pushed from local git do not show "Verified" because the commit is not signed by GitHub.
+
+   ```bash
+   # On the release branch — tag with GPG signature
+   git tag -s vx.x.x -m "Release vx.x.x"
+   git push origin vx.x.x
+   gh release create vx.x.x --notes=""
+
+   # Then merge the PR back to main
+   gh pr merge <number> --merge --subject "Release vx.x.x" --body ""
+   ```
+
+   **Note:** `git tag -s` requires a GPG key configured locally and the public key added to your GitHub account. Without GPG, the tag will not show "Verified".
 
    ### ⚠️ Tagging Best Practices (lessons learned from history)
 
-   **Always use annotated tags, never lightweight tags:**
+   **Always use annotated or GPG-signed tags, never lightweight tags:**
 
    ```bash
-   # ✅ Correct: annotated tag (has tagger metadata)
-   git tag -a v0.x.x -m "Release v0.x.x"
+   # ✅ Correct (with GPG): shows "Verified" on GitHub — works on any branch
+   git tag -s vx.x.x -m "Release vx.x.x"
 
    # ❌ Wrong: lightweight tag (just a pointer, cannot be verified)
-   git tag v0.x.x
+   git tag vx.x.x
+
+   # ⚠️  git tag -a works for Verified ONLY if the commit is signed by GitHub
+   #    (i.e. the tag is on a PR merge commit on main, not on a local commit)
    ```
 
    **Why?**
 
    | Tag type | Command | Effect |
    |---------|---------|--------|
-   | lightweight | `git tag v0.x.x` | No "Verified" badge on GitHub; auto-generated release notes span across multiple versions |
-   | annotated | `git tag -a v0.x.x -m "..."` | Shows "Verified" on GitHub (because the commit is signed by GitHub); correct release note boundaries |
-   | annotated + GPG | `git tag -s v0.x.x -m "..."` | Shows your own GPG "Verified" badge; requires GPG key setup |
+   | lightweight | `git tag vx.x.x` | No "Verified" badge on GitHub; auto-generated release notes span across multiple versions |
+   | annotated | `git tag -a vx.x.x -m "..."` | Shows "Verified" **only** when pointing to a GitHub-signed commit (PR merge on main); on a local push, shows no badge |
+   | GPG-signed | `git tag -s vx.x.x -m "..."` | Shows your own GPG "Verified" badge on **any** commit; requires GPG key setup |
 
    **What the "Verified" badge on GitHub actually means:**
    - It does NOT mean you signed the tag with your own GPG key. It means **the commit was created through GitHub's web interface** (PR merge, web editor, etc.)
@@ -73,4 +90,9 @@ You are responsible for creating a release with minimal bug risk.
    - Tagging the same commit multiple times (e.g., v0.4.8 and v0.4.9 pointing to the same commit) completely breaks release notes generation, resulting in duplicate/overlapping changelogs
    - **Create releases with `--notes ""` (manual notes)**, never use `--generate-notes`, to avoid auto-generation bugs
 
-5. Clean up the remote release branch (history is preserved in the tag).
+5. Clean up the local and remote release branch (history is preserved in the tag).
+
+   ```bash
+   git branch -d release/vx.x.x
+   git push origin --delete release/vx.x.x
+   ```
