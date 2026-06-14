@@ -91,7 +91,7 @@ LEAD reviews each issue and decides: fix needed or over-engineering.
 
 ## Phase 5: RUN TESTS
 
-Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Not full suite, just what you've written to test the changes.
+Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Run what you've written to test the changes first, When all passed, run full suite. This order is to improve efficiency.
 
 **If all pass:**
 - Go to step 6 (REPORT DONE)
@@ -102,7 +102,7 @@ Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Not 
    - Production code wrong - fix the code, keep the test
    - Test wrong - fix the test assertion, preserve the test intent
 3. Never: delete tests, comment them out, or weaken assertions to make the suite green
-4. After fix - run full suite again
+4. After fix - run what you've written to test the changes first, then widget and unit tests, then full suite again
 5. If same root cause fails 3 times - go to the next phase (REPORT FAILED)
 
 ---
