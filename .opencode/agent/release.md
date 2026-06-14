@@ -73,3 +73,5 @@ You are responsible for creating a release with minimal bug risk.
    git branch -d release/vx.x.x
    git push origin --delete release/vx.x.x
    ```
+
+6. Checkout base branch and pull the latest.

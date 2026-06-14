@@ -103,7 +103,7 @@ Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Not 
    - Test wrong - fix the test assertion, preserve the test intent
 3. Never: delete tests, comment them out, or weaken assertions to make the suite green
 4. After fix - run full suite again
-5. If same root cause fails 3 times - go to step 6 (REPORT FAILED)
+5. If same root cause fails 3 times - go to the next phase (REPORT FAILED)
 
 ---
 
@@ -111,13 +111,15 @@ Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Not 
 
 1. Draft a PR: Follow the skill `commit-and-pr` to write commit and pr message. Keep PR in draft state instead of open.
 
-2. Then CI and fix loop: Wait a few minutes for the CI after PR drafted. Fix errors CI finds. Loop until CI passes.
+2. Loop: Wait a few minutes for the CI to run after PR drafted. Fix errors CI finds. Loop until CI passes.
+
+Make sure all CI tests pass before enter the next phase.
 
 ---
 
 ## Phase 7: DONE
 
-Check if all 6 steps finished before enter this stage.
+Check if all 6 steps completely finished without forgetting any small steps before enter this stage.
 
 Report to user:
 - What was implemented
