@@ -39,7 +39,11 @@ When writing tests, use `test_checklist` MCP tools:
 
 ## Phase 3: EDIT
 
-Write the minimum code needed to make your tests pass.
+1. Follow the patterns: Read other current codes to understand existing patterns first. Use the same logic or UI etc.
+
+2. Data Migration: Design a data migration if old data format cannot match new design. Please note that some may seem harmless, but when you install a new version, it will crash, though it won't when there is no old version data. Use new format only - no compatibility layer. Migration must be idempotent and atomic where possible.
+
+3. Write the minimum code needed to make your tests pass.
 
 - Match existing code style
 - Every changed line must trace to the user's request
@@ -75,8 +79,6 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-**Data Migration:** Design a data migration if old data format cannot match new design. New format only - no compatibility layer. Migration must be idempotent and atomic where possible.
-
 ---
 
 ## Phase 4: REVIEW - 5 rounds
@@ -110,7 +112,7 @@ Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Not 
 
 ## Phase 6: COMMIT AND DRAFT PR
 
-If user asks to commit or pull request: follow the skill `commit-and-pr`. Then wait for the CI check and fix errors CI finds. Loop until CI passes.
+Follow the skill `commit-and-pr`. Then wait for the CI check and fix errors CI finds. Loop until CI passes.
 
 ---
 
