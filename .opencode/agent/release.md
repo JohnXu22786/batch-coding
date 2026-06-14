@@ -20,9 +20,26 @@ You are responsible for creating a release with minimal bug risk.
 
 1. Create a clean branch from `main` for the release.
 
-2. On the release branch, run local tests repeatedly and fix bugs.
+2. On the release branch, run **local tests (lightweight, fast)** repeatedly and fix bugs.
 
-3. After local tests pass, push the release branch to remote and create a Pull Request to trigger CI automation checks. Wait for all CI checks to pass. If CI reports errors, fix them and keep pushing until CI is green.
+   **Local: only run high-value lightweight tests — pursue second-level feedback:**
+   - **Code linting & static analysis** (ESLint, SonarQube, etc.) — catches 80% of low-level errors with near-zero cost
+   - **Targeted unit tests** — only run tests for the files you changed (e.g., `jest path/to/changed.test.js`), finishes in seconds
+
+   **Do NOT run full suite locally** — your machine is for coding, not load testing.
+
+3. After local tests pass, push the release branch and create a PR to trigger **CI (full suite, heavy resources)**:
+
+   **CI runs everything you skipped locally:**
+   - Full unit tests & integration tests
+   - E2E / UI tests
+   - Security & compliance scanning
+
+   **Optimize CI to avoid the "push → wait a few minutes → fail → fix → repush" death loop:**
+   - **Caching:** cache `node_modules`, `pip` packages, build artifacts. Dependency install should take seconds when nothing changed.
+   - **Incremental CI:** detect git diff — if only frontend changed, skip backend CI jobs.
+
+   Wait for all CI checks to pass. If CI fails, fix and keep pushing until green.
 
 4. Once CI is fully green, tag and release directly on the release branch (the build artifact comes from the release branch, ensuring consistency with what was tested). Use default release message and do not add anything else. Then merge the PR to sync the fixes back to `main`.
 
