@@ -41,29 +41,26 @@ When writing tests, use `test_checklist` MCP tools:
 
 1. Follow the patterns: Read other current codes to understand existing patterns first. Use the same logic or UI etc.
 
-2. Data Migration: Design a data migration if old data format cannot match new design. Please note that some may seem harmless, but when you install a new version, it will crash, though it won't when there is no old version data. Use new format only - no compatibility layer. Migration must be idempotent and atomic where possible.
+2. **Data Migration**: Design a data migration if old data format cannot match new design. Please note that some may seem harmless, but when you install a new version, it will crash, though it won't when there is no old version data. The migration should start when new version installed and app launched. Use a pop to show user the progress and let user know the app restarts to take effect. Use new format only - no compatibility layer. Migration must be idempotent and atomic where possible.
 
-3. Write the minimum code needed to make your tests pass.
-
-- Match existing code style
-- Every changed line must trace to the user's request
-- After writing: re-read the diff - is there anything unnecessary?
-
-**Simplicity First**
+3. **Simplicity First**
 
 **Minimum code that solves the problem. Nothing speculative.**
 
+- Match existing code style
+- Every changed line must trace to the user's request
 - No features beyond what was asked.
 - No abstractions for single-use code.
 - No "flexibility" or "configurability" that wasn't requested.
 - No error handling for impossible scenarios.
+- After writing: re-read the diff - is there anything unnecessary?
 - If you write 200 lines and it could be 50, rewrite it.
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
 If your changes make the single code file big, take it apart. No large files.
 
-**Surgical Changes**
+4. **Surgical Changes**
 
 **Touch only what you must. Clean up only your own mess.**
 
@@ -112,9 +109,9 @@ Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Not 
 
 ## Phase 6: CI CHECK
 
-1. Follow the skill `commit-and-pr` to write commit and pr message. Keep PR in draft state instead of open.
+1. Draft a PR: Follow the skill `commit-and-pr` to write commit and pr message. Keep PR in draft state instead of open.
 
-2. Then wait for the CI checks after PR drafted. Fix errors CI finds. Loop until CI passes.
+2. Then CI and fix loop: Wait a few minutes for the CI after PR drafted. Fix errors CI finds. Loop until CI passes.
 
 ---
 
