@@ -110,9 +110,11 @@ Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Not 
 
 ---
 
-## Phase 6: COMMIT AND DRAFT PR
+## Phase 6: CI CHECK
 
-Follow the skill `commit-and-pr`. Then wait for the CI check and fix errors CI finds. Loop until CI passes.
+1. Follow the skill `commit-and-pr` to write commit and pr message. Keep PR in draft state instead of open.
+
+2. Then wait for the CI checks after PR drafted. Fix errors CI finds. Loop until CI passes.
 
 ---
 
@@ -121,7 +123,8 @@ Follow the skill `commit-and-pr`. Then wait for the CI check and fix errors CI f
 Check if all 6 steps finished before enter this stage.
 
 Report to user:
-- What was implemented, how function will work
+- What was implemented
+- How function will work: before and after
 - What you have done in the 6 phases above, and whether you have followed these in the right order
 - What issues or problems you have encountered during the session (not trivial problems like you made a grammar mistake or so)
 
