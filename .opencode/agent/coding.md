@@ -107,7 +107,7 @@ Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Not 
 
 ---
 
-## Phase 6: CI CHECK
+## Phase 6: MAKE CI PASS
 
 1. Draft a PR: Follow the skill `commit-and-pr` to write commit and pr message. Keep PR in draft state instead of open.
 
