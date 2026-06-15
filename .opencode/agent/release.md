@@ -45,13 +45,25 @@ You are responsible for creating a release with minimal bug risk.
    git push origin vx.x.x
    gh release create vx.x.x --notes=""
 
-   # Then merge the PR back to main
+   # Then merge the PR back to main — MUST use --merge (merge commit), NOT squash!
    gh pr merge <number> --merge --subject "Release vx.x.x" --body ""
    ```
 
-   ### ⚠️ Tagging Best Practices (lessons learned from history)
+   ### ⚠️ PR Merge Strategy: Must use `--merge` (Create a Merge Commit)
 
-   **Always use annotated or GPG-signed tags, never lightweight tags:**
+   **This is critical for correct tag ancestry chain.** The merge strategy determines whether future releases can find this tag:
+
+   | Strategy | `gh` flag | Tag is ancestor of `main`? | Future release notes work? |
+   |----------|-----------|---------------------------|---------------------------|
+   | **Create a merge commit** | `--merge` | ✅ YES | ✅ Correct |
+   | Squash and merge | `--squash` | ❌ **NO** — creates a new commit with same parent but different hash — tag commit becomes orphaned | ❌ Release notes include PRs from multiple prior versions |
+   | Rebase and merge | `--rebase` | ❌ **NO** — same orphan problem | ❌ Same |
+
+   **Why it matters:** `gh release create --generate-notes` finds the "previous tag" by walking ancestors of the current tag's commit. If you squash-merge, the tag commit (on the release branch) is **not an ancestor** of subsequent releases on `main`. GitHub falls back to the nearest ancestor tag it can find, e.g., jumping from `v0.4.13` all the way back to `v0.4.11`, causing every subsequent release to **accumulate all PRs** from the intervening versions.
+
+   ### ⚠️ Lessons Learned from History
+
+   **1. Always use annotated or GPG-signed tags, never lightweight tags:**
 
    ```bash
    # ✅ Correct (with GPG): shows "Verified" on GitHub — works on any branch
@@ -63,9 +75,29 @@ You are responsible for creating a release with minimal bug risk.
    # ❌ Wrong: git tag -a works for Verified ONLY if the commit is signed by GitHub
    ```
 
-   **Release notes auto-generation issues:**
+   **2. Release notes auto-generation issues:**
    - Lightweight tags can confuse GitHub's release boundary detection, causing release notes to include PRs from several versions ago
    - **Create releases with `--notes ""` (manual notes)**, never use `--generate-notes`, to avoid auto-generation bugs
+
+   **3. Always use `--merge` (Create a Merge Commit), never squash or rebase the release PR:**
+
+   **Root cause — the duplicate commit problem:**
+
+   When you squash-merge a release PR, the tag commit (`d6b6047`) and the mainline commit (`c75c2d1`) become **siblings** (same parent, different hashes), not ancestor/descendant:
+
+   ```
+   ❌ Squash merge (WRONG) — tag orphaned:
+         main:    ...---304dd3b---c75c2d1 (new hash)
+                                   (squash creates a new commit unrelated to tag)
+         release:                 d6b6047 (tag, orphaned — NOT ancestor of main)
+   
+   ✅ Merge commit (CORRECT) — tag is ancestor:
+         main:    ...---304dd3b---M (merge commit, parent = 304dd3b + d6b6047)
+                                \ /
+         release:               d6b6047 (tag, IS ancestor of main ✓)
+   ```
+
+   Consequence of getting it wrong: `gh release create` for the next version (`v0.4.13`) can't find `v0.4.12` in the tag ancestry chain, falls back to `v0.4.11`, and **every subsequent release accumulates all PRs** from v0.4.11 onward — a cascading failure.
 
 5. Clean up the local and remote release branch (history is preserved in the tag).
 
