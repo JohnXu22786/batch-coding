@@ -12,7 +12,19 @@
         "test-checklist-mcp"
       ],
       "enabled": true
+    },
+    "batch-prompt": {
+      "type": "local",
+      "command": [
+        "node",
+        ".opencode/mcp/batch-prompt/index.js"
+      ],
+      "enabled": true,
+      "timeout": 86400000
     }
+  },
+  "experimental": {
+    "mcp_timeout": 86400000
   },
   "default_agent": "coding",
   "agent": {
@@ -30,7 +42,7 @@
     },
     "batch": {
       "mode": "primary",
-      "description": "Batch dispatcher for multiple modification requests",
+      "description": "Batch dispatcher for multiple modification requests"
     }
   }
 }

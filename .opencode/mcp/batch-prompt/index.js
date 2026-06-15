@@ -18,7 +18,7 @@ const server = new Server(
 let opencodeRunning = false;
 
 const OPENCODE_EXE = 'C:\\Users\\22786\\AppData\\Roaming\\npm\\node_modules\\opencode-ai\\bin\\opencode.exe';
-const BATCH_DIR = path.resolve(path.dirname(process.argv[1]), '..');
+const BATCH_DIR = path.resolve(path.dirname(process.argv[1]), '..', '..', '..');
 
 function runGit(repoDir, args) {
   return new Promise((resolve, reject) => {
@@ -187,6 +187,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const agentDest = path.join(resolvedPath, '.opencode', 'agent');
     if (fs.existsSync(agentSrc)) {
       copyDir(agentSrc, agentDest);
+    }
+
+    const mcpSrc = path.join(BATCH_DIR, '.opencode', 'mcp');
+    const mcpDest = path.join(resolvedPath, '.opencode', 'mcp');
+    if (fs.existsSync(mcpSrc)) {
+      copyDir(mcpSrc, mcpDest);
     }
 
     opencodeRunning = true;
