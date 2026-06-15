@@ -24,7 +24,7 @@
       "type": "local",
       "command": [
         "node",
-        "D:\\Administrator\\Desktop\\OpenCode Batch\\.call-opencode-mcp\\index.js"
+        "D:\\Administrator\\Desktop\\OpenCode Batch\\.opencode\\mcp\\batch-prompt\\index.js"
       ],
       "enabled": true,
       "timeout": 86400000
