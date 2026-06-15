@@ -14,7 +14,7 @@ Remember to use quote to make sure the parameter is correctly passed to MCP `cre
 
 ## Phase 0: Decide Project Directory
 
-The current working directory `OpenCode Batch` is not the project directory. It is just a place to let code editing run in batch.
+Usually the current working directory is not the project directory. It is just a randowm place to let code editing run in batch. So don't just directly use this directory without asking.
 
 If the user doesn't provide a project directory, ask the user for it. They may forget about it. Keep asking until user provides the path. Then you can enter the next phase.
 

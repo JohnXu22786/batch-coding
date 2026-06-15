@@ -27,6 +27,10 @@
     "release": {
       "description": "Git Release manager using Trunk-Based + Release Branch model. Handles branching, tagging, CI checks, and cleanup.",
       "mode": "primary"
+    },
+    "batch": {
+      "mode": "primary",
+      "description": "Batch dispatcher for multiple modification requests",
     }
   }
 }
