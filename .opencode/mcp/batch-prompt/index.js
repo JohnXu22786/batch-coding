@@ -34,7 +34,8 @@ function runGit(repoDir, args) {
 
 function runOpenCode(dir, instruction, existingSessionId) {
   return new Promise((resolve, reject) => {
-    const args = ['run', '--dir', dir, '--format', 'json'];
+    const model = 'openrouter/deepseek/deepseek-v4-flash';
+    const args = ['run', '--dir', dir, '-m', model, '--format', 'json'];
     if (existingSessionId) args.push('-s', existingSessionId);
     args.push(instruction);
 
