@@ -37,7 +37,7 @@
   "agent": {
     "batch": {
       "mode": "primary",
-      "description": "Batch dispatcher for multiple modification requests",
+      "description": "Batch dispatcher for multiple modification requests"
     }
   }
 }
