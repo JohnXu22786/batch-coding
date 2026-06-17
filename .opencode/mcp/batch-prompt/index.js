@@ -80,9 +80,69 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         },
         required: ["path", "instruction"]
       }
+    },
+    {
+      name: "opencode_continue",
+      description: "Continue an existing opencode session in a worktree directory. Requires sessionId. Optionally accepts a new instruction.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          path: { type: "string", description: "Worktree full path" },
+          sessionId: { type: "string", description: "Existing session ID to continue (required)" },
+          instruction: { type: "string", description: "Optional: new instruction to send" }
+        },
+        required: ["path", "sessionId"]
+      }
     }
   ]
 }));
+
+function setupWorktreeDir(worktreePath) {
+  const resolvedPath = path.resolve(worktreePath);
+  if (!fs.existsSync(resolvedPath)) {
+    throw new McpError(ErrorCode.InvalidParams,
+      `Directory does not exist: ${worktreePath} (resolved: ${resolvedPath})`);
+  }
+
+  const src = path.join(BATCH_DIR, 'project-opencode.json');
+  const dest = path.join(resolvedPath, 'opencode.json');
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, dest);
+  }
+
+  function copyDir(srcDir, destDir) {
+    fs.mkdirSync(destDir, { recursive: true });
+    for (const entry of fs.readdirSync(srcDir)) {
+      const s = path.join(srcDir, entry);
+      const d = path.join(destDir, entry);
+      if (fs.statSync(s).isDirectory()) {
+        copyDir(s, d);
+      } else {
+        fs.copyFileSync(s, d);
+      }
+    }
+  }
+
+  const skillsSrc = path.join(BATCH_DIR, '.opencode', 'skills');
+  const skillsDest = path.join(resolvedPath, '.opencode', 'skills');
+  if (fs.existsSync(skillsSrc)) {
+    copyDir(skillsSrc, skillsDest);
+  }
+
+  const agentSrc = path.join(BATCH_DIR, '.opencode', 'agent');
+  const agentDest = path.join(resolvedPath, '.opencode', 'agent');
+  if (fs.existsSync(agentSrc)) {
+    copyDir(agentSrc, agentDest);
+  }
+
+  const mcpSrc = path.join(BATCH_DIR, '.opencode', 'mcp');
+  const mcpDest = path.join(resolvedPath, '.opencode', 'mcp');
+  if (fs.existsSync(mcpSrc)) {
+    copyDir(mcpSrc, mcpDest);
+  }
+
+  return resolvedPath;
+}
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
@@ -152,52 +212,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       throw new McpError(ErrorCode.InvalidParams, "path and instruction are required");
     }
 
-    const resolvedPath = path.resolve(worktreePath);
-    if (!fs.existsSync(resolvedPath)) {
-      throw new McpError(ErrorCode.InvalidParams,
-        `Directory does not exist: ${worktreePath} (resolved: ${resolvedPath})`);
-    }
-
-    const src = path.join(BATCH_DIR, 'project-opencode.json');
-    const dest = path.join(resolvedPath, 'opencode.json');
-    if (fs.existsSync(src)) {
-      fs.copyFileSync(src, dest);
-    }
-
-    function copyDir(srcDir, destDir) {
-      fs.mkdirSync(destDir, { recursive: true });
-      for (const entry of fs.readdirSync(srcDir)) {
-        const s = path.join(srcDir, entry);
-        const d = path.join(destDir, entry);
-        if (fs.statSync(s).isDirectory()) {
-          copyDir(s, d);
-        } else {
-          fs.copyFileSync(s, d);
-        }
-      }
-    }
-
-    const skillsSrc = path.join(BATCH_DIR, '.opencode', 'skills');
-    const skillsDest = path.join(resolvedPath, '.opencode', 'skills');
-    if (fs.existsSync(skillsSrc)) {
-      copyDir(skillsSrc, skillsDest);
-    }
-
-    const agentSrc = path.join(BATCH_DIR, '.opencode', 'agent');
-    const agentDest = path.join(resolvedPath, '.opencode', 'agent');
-    if (fs.existsSync(agentSrc)) {
-      copyDir(agentSrc, agentDest);
-    }
-
-    const mcpSrc = path.join(BATCH_DIR, '.opencode', 'mcp');
-    const mcpDest = path.join(resolvedPath, '.opencode', 'mcp');
-    if (fs.existsSync(mcpSrc)) {
-      copyDir(mcpSrc, mcpDest);
-    }
+    const resolvedPath = setupWorktreeDir(worktreePath);
 
     opencodeRunning = true;
     try {
-      const { stdout, stderr, code } = await runOpenCode(worktreePath, instruction, existingSessionId);
+      const { stdout, stderr, code } = await runOpenCode(resolvedPath, instruction, existingSessionId);
       if (code !== 0) {
         throw new McpError(ErrorCode.InternalError,
           `opencode_run failed (exit ${code}): ${(stderr || stdout).substring(0, 2000)}`);
@@ -209,6 +228,38 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           const evt = JSON.parse(line);
           if (!existingSessionId && evt.sessionID) sessionId = evt.sessionID;
         } catch (e) {}
+      }
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ sessionId })
+        }]
+      };
+    } finally {
+      opencodeRunning = false;
+    }
+  }
+
+  if (name === "opencode_continue") {
+    if (opencodeRunning) {
+      throw new McpError(ErrorCode.InternalError,
+        'opencode_continue is already in progress. Wait for it to finish before starting another. Do NOT call opencode_continue in parallel.');
+    }
+
+    const { path: worktreePath, sessionId, instruction } = args;
+    if (!worktreePath || !sessionId) {
+      throw new McpError(ErrorCode.InvalidParams, "path and sessionId are required");
+    }
+
+    const resolvedPath = setupWorktreeDir(worktreePath);
+
+    opencodeRunning = true;
+    try {
+      const { stdout, stderr, code } = await runOpenCode(resolvedPath, instruction || '', sessionId);
+      if (code !== 0) {
+        throw new McpError(ErrorCode.InternalError,
+          `opencode_continue failed (exit ${code}): ${(stderr || stdout).substring(0, 2000)}`);
       }
 
       return {

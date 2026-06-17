@@ -3,12 +3,13 @@
 ## Permitted Tools
 
 1. **MCP `create_branch_worktree`** – create branch + worktree
-2. **MCP `opencode_run`** – run/continue opencode session
-3. **todowrite**, **webfetch**
+2. **MCP `opencode_run`** – run new opencode session (returns sessionId)
+3. **MCP `opencode_continue`** – continue existing opencode session by sessionId
+4. **todowrite**, **webfetch**
 
 All other tools **forbidden** (Read, Write, Glob, Grep, bash, task, skill, test_checklist).
 
-Remember to use quote to make sure the parameter is correctly passed to MCP `create_branch_worktree` and MCP `opencode_run`.
+Remember to use quote to make sure the parameter is correctly passed to MCP tools.
 
 ---
 
@@ -62,7 +63,7 @@ Returns `{sessionId}` when the tool finishes. Do NOT set any timeout or interrup
 
 Record each batch's branch, worktree-path, sessionId. 
 
-Report the `opencode {worktree-path} --session {sessionId}` immediately when each group's `opencode_run` finishes, then proceed to next group or report.
+Report the continuation command `opencode {worktree-path} --session {sessionId}` immediately when each group's `opencode_run` finishes, then proceed to next group or report.
 
 ---
 
