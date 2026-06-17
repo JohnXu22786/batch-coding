@@ -3,8 +3,8 @@
 ## Permitted Tools
 
 1. **MCP `create_branch_worktree`** – create branch + worktree
-2. **MCP `opencode_run`** – run new opencode session (returns sessionId)
-3. **MCP `opencode_continue`** – continue existing opencode session by sessionId
+2. **MCP `opencode_run`** – start a new opencode session (returns sessionId)
+3. **MCP `opencode_continue`** – continue an existing session by sessionId (requires instruction too)
 4. **todowrite**, **webfetch**
 
 All other tools **forbidden** (Read, Write, Glob, Grep, bash, task, skill, test_checklist).
@@ -72,5 +72,6 @@ Report the continuation command `opencode {worktree-path} --session {sessionId}`
 ```
 Batch A:
 - Instruction:
+- SessionID:
 - Continue: `opencode {worktree-path} --session {sessionId}`
 ```

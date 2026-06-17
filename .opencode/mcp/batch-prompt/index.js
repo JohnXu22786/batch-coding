@@ -34,8 +34,7 @@ function runGit(repoDir, args) {
 
 function runOpenCode(dir, instruction, existingSessionId) {
   return new Promise((resolve, reject) => {
-    const model = 'openrouter/deepseek/deepseek-v4-flash';
-    const args = ['run', '--dir', dir, '-m', model, '--format', 'json'];
+    const args = ['run', '--dir', dir, '--format', 'json'];
     if (existingSessionId) args.push('-s', existingSessionId);
     args.push(instruction);
 
@@ -70,28 +69,27 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: "opencode_run",
-      description: "Run opencode in a worktree directory. If sessionId is provided, continues an existing session. Otherwise starts a new session and returns the sessionId.",
+      description: "Start a new opencode session in a worktree directory. Returns the sessionId.",
       inputSchema: {
         type: "object",
         properties: {
           path: { type: "string", description: "Worktree full path" },
-          instruction: { type: "string", description: "Task instruction for opencode" },
-          sessionId: { type: "string", description: "Optional: existing session ID to continue" }
+          instruction: { type: "string", description: "Task instruction for opencode" }
         },
         required: ["path", "instruction"]
       }
     },
     {
       name: "opencode_continue",
-      description: "Continue an existing opencode session in a worktree directory. Requires sessionId. Optionally accepts a new instruction.",
+      description: "Continue an existing opencode session in a worktree directory.",
       inputSchema: {
         type: "object",
         properties: {
           path: { type: "string", description: "Worktree full path" },
-          sessionId: { type: "string", description: "Existing session ID to continue (required)" },
-          instruction: { type: "string", description: "Optional: new instruction to send" }
+          sessionId: { type: "string", description: "Existing session ID to continue" },
+          instruction: { type: "string", description: "Instruction to send" }
         },
-        required: ["path", "sessionId"]
+        required: ["path", "sessionId", "instruction"]
       }
     }
   ]
@@ -207,7 +205,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         'opencode_run is already in progress. Wait for it to finish before starting another. Do NOT call opencode_run in parallel.');
     }
 
-    const { path: worktreePath, instruction, sessionId: existingSessionId } = args;
+    const { path: worktreePath, instruction } = args;
     if (!worktreePath || !instruction) {
       throw new McpError(ErrorCode.InvalidParams, "path and instruction are required");
     }
@@ -216,17 +214,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     opencodeRunning = true;
     try {
-      const { stdout, stderr, code } = await runOpenCode(resolvedPath, instruction, existingSessionId);
+      const { stdout, stderr, code } = await runOpenCode(resolvedPath, instruction);
       if (code !== 0) {
         throw new McpError(ErrorCode.InternalError,
           `opencode_run failed (exit ${code}): ${(stderr || stdout).substring(0, 2000)}`);
       }
 
-      let sessionId = existingSessionId || '';
+      let sessionId = '';
       for (const line of stdout.split('\n')) {
         try {
           const evt = JSON.parse(line);
-          if (!existingSessionId && evt.sessionID) sessionId = evt.sessionID;
+          if (evt.sessionID) sessionId = evt.sessionID;
         } catch (e) {}
       }
 
@@ -248,15 +246,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     const { path: worktreePath, sessionId, instruction } = args;
-    if (!worktreePath || !sessionId) {
-      throw new McpError(ErrorCode.InvalidParams, "path and sessionId are required");
+    if (!worktreePath || !sessionId || !instruction) {
+      throw new McpError(ErrorCode.InvalidParams, "path, sessionId and instruction are required");
     }
 
     const resolvedPath = setupWorktreeDir(worktreePath);
 
     opencodeRunning = true;
     try {
-      const { stdout, stderr, code } = await runOpenCode(resolvedPath, instruction || '', sessionId);
+      const { stdout, stderr, code } = await runOpenCode(resolvedPath, instruction, sessionId);
       if (code !== 0) {
         throw new McpError(ErrorCode.InternalError,
           `opencode_continue failed (exit ${code}): ${(stderr || stdout).substring(0, 2000)}`);
