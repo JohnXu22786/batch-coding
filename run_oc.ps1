@@ -51,7 +51,7 @@ $winSession = if ($sessions.Count -gt 0) { [int]$sessions[0] } else { 1 }
 
 $dir = Split-Path -Parent $PSCommandPath
 if ($sessionId) {
-    $cmd = "cmd.exe /c opencode --dir ""$dir"" --session ""$sessionId"" --format json ""$instruction"""
+    $cmd = "cmd.exe /c opencode --dir ""$dir"" -s ""$sessionId"" --format json ""$instruction"""
 } else {
     $cmd = "cmd.exe /c opencode run --dir ""$dir"" --format json ""$instruction"""
 }
