@@ -21,6 +21,7 @@ Batch code editing dispatcher for OpenCode.
 | `-instruction` | **Yes** | The full instruction to pass to opencode |
 | `-sessionId` | No | OpenCode session ID to resume. Omit to start a new session. |
 | `-projectDir` | No | Project directory for opencode to work in. Defaults to the script's own directory (`$PSCommandPath`). |
+| `-agent` | No | OpenCode agent type to use. Available: `coding` (default project agent), `batch`, `reviewer`, `release`. Omit to use the project's default agent. |
 
 ### About `-sessionId`
 
@@ -33,6 +34,12 @@ Batch code editing dispatcher for OpenCode.
 - **With** `-projectDir "D:\path\to\project"`: opencode works on that project directory.
 - **Without** `-projectDir`: opencode uses the directory where `run_oc.ps1` lives.
 - This lets you keep `run_oc.ps1` in a central location (e.g. a tools repo) and point it at any project.
+
+### About `-agent`
+
+- **With** `-agent "<name>"`: uses the specified agent (e.g. `coding`, `batch`, `reviewer`). Agents are defined in the project's `opencode.json`.
+- **Without** `-agent`: uses the project's `default_agent` setting.
+- Run `opencode agent list` in the project directory to see available agents.
 
 ## Usage
 
@@ -49,6 +56,24 @@ terminal(
 ```
 terminal(
   command="powershell -ExecutionPolicy Bypass -File ""<path>\run_oc.ps1"" -instruction ""<instruction>"" -sessionId ""ses_xxx"" -projectDir ""D:\other\project""",
+  background=true,
+  timeout=86400
+)
+```
+
+**Use a specific agent (e.g. batch dispatcher):**
+```
+terminal(
+  command="powershell -ExecutionPolicy Bypass -File ""<path>\run_oc.ps1"" -instruction ""<instruction>"" -agent batch",
+  background=true,
+  timeout=86400
+)
+```
+
+**Combine agent + project dir + session resume:**
+```
+terminal(
+  command="powershell -ExecutionPolicy Bypass -File ""<path>\run_oc.ps1"" -instruction ""<instruction>"" -agent coding -sessionId ""ses_xxx"" -projectDir ""D:\other\project""",
   background=true,
   timeout=86400
 )

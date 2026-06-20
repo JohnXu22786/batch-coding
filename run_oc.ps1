@@ -1,7 +1,8 @@
 param(
     [string]$instruction,
     [string]$sessionId = "",
-    [string]$projectDir = ""
+    [string]$projectDir = "",
+    [string]$agent = ""
 )
 
 Add-Type -TypeDefinition @"
@@ -54,10 +55,11 @@ $dir = Split-Path -Parent $PSCommandPath
 if ($projectDir) {
     $dir = $projectDir
 }
+$agentFlag = if ($agent) { " --agent ""$agent""" } else { "" }
 if ($sessionId) {
-    $cmd = "cmd.exe /c opencode --dir ""$dir"" -s ""$sessionId"" --format json ""$instruction"""
+    $cmd = "cmd.exe /c opencode --dir ""$dir"" -s ""$sessionId"" --format json$agentFlag ""$instruction"""
 } else {
-    $cmd = "cmd.exe /c opencode run --dir ""$dir"" --format json ""$instruction"""
+    $cmd = "cmd.exe /c opencode run --dir ""$dir"" --format json$agentFlag ""$instruction"""
 }
 $ec = [UProc]::Run($winSession, $cmd, $dir)
 Write-Host "exit:$ec"
