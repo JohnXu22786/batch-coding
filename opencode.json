@@ -34,6 +34,9 @@
     "mcp_timeout": 86400000
   },
   "default_agent": "batch",
+  "plugin": [
+    "./.opencode/plugins/qq-notifier.ts"
+  ],
   "agent": {
     "batch": {
       "mode": "primary",
