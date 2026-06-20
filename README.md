@@ -2,54 +2,85 @@
 
 Batch code editing dispatcher for OpenCode.
 
-## 唯一入口
+## Entrypoint
 
-| 文件 | 用途 |
-|------|------|
-| `run_oc.ps1` | 以当前登录用户身份启动 opencode（从 SYSTEM 切换身份） |
-## 调用格式
+| File | Purpose |
+|------|---------|
+| `run_oc.ps1` | Launches opencode as the logged-in user (elevates from SYSTEM session) |
 
-**创建新 session：**
+## Prerequisites
+
+- `npm install -g opencode-ai` (opencode available on PATH)
+- Windows environment, Hermes Gateway running as SYSTEM
+- User must be logged into their desktop
+
+## Parameters
+
+| Param | Required | Description |
+|-------|----------|-------------|
+| `-instruction` | **Yes** | The full instruction to pass to opencode |
+| `-sessionId` | No | OpenCode session ID to resume. Omit to start a new session. |
+| `-projectDir` | No | Project directory for opencode to work in. Defaults to the script's own directory (`$PSCommandPath`). |
+
+### About `-sessionId`
+
+- **With** `-sessionId "ses_xxx"`: resumes an existing OpenCode conversation.
+- **Without** `-sessionId`: starts a brand new session.
+- **If unclear which the user wants: ask, don't guess.**
+
+### About `-projectDir`
+
+- **With** `-projectDir "D:\path\to\project"`: opencode works on that project directory.
+- **Without** `-projectDir`: opencode uses the directory where `run_oc.ps1` lives.
+- This lets you keep `run_oc.ps1` in a central location (e.g. a tools repo) and point it at any project.
+
+## Usage
+
+**Start a new session (default = script-relative dir):**
 ```
 terminal(
-  command="powershell -ExecutionPolicy Bypass -File ""D:\path\to\run_oc.ps1"" -instruction ""<full instruction>""",
+  command="powershell -ExecutionPolicy Bypass -File ""<path>\run_oc.ps1"" -instruction ""<instruction>""",
   background=true,
   timeout=86400
 )
 ```
 
-**继续已有 session：**
+**Resume an existing session with a custom project dir:**
 ```
 terminal(
-  command="powershell -ExecutionPolicy Bypass -File ""D:\path\to\run_oc.ps1"" -instruction ""<full instruction>"" -sessionId ""ses_xxxxxxxxxxxxxxx""",
+  command="powershell -ExecutionPolicy Bypass -File ""<path>\run_oc.ps1"" -instruction ""<instruction>"" -sessionId ""ses_xxx"" -projectDir ""D:\other\project""",
   background=true,
   timeout=86400
 )
 ```
 
-- `background=true` — 不阻塞，后台执行
-- `timeout=86400` — 24 小时超时
-- 通知由 opencode QQ notifier 插件完成，无需 Hermes 额外通知
+### Common options
 
-## 前置条件
+- `background=true` — non-blocking, runs in background
+- `timeout=86400` — 24-hour timeout for long batch jobs
+- Notifications are handled by the opencode QQ notifier plugin, no extra Hermes notify needed
 
-- `npm install -g opencode-ai`（opencode 全局可用）
-- Windows 环境，Hermes Gateway 以 SYSTEM 运行
-- 用户已登录到桌面（session 1）
+### Hermes Agent workflow
 
-## 配置
+When calling from Hermes Agent:
 
-QQ Bot 通知、API key 等敏感信息在 `.env`（已 gitignore），不提交到仓库。
+1. **Batch tasks** (using this repo's `run_oc.ps1`): use the path to this repo directly.
+2. **Non-batch tasks**: ask the user for the `run_oc.ps1` path — never assume a location.
+3. **If unsure whether it's batch or not: ask first.**
 
-## 目录结构
+## Configuration
+
+QQ Bot credentials, API keys etc. go in `.env` (gitignored). Not committed to the repo.
+
+## Directory structure
 
 ```
 .opencode/
-├── agent/           — OpenCode 规则文件（batch、coding、reviewer）
-├── plugins/         — 插件（qq-notifier 等）
-├── mcp/             — MCP 服务器配置
-└── skills/          — OpenCode 技能
-run_oc.ps1           — 唯一入口脚本
-opencode.json        — 项目级 opencode 配置
-project-opencode.json— 项目级 opencode 配置
+├── agent/           — OpenCode rules (batch, coding, reviewer)
+├── plugins/         — Plugins (qq-notifier etc.)
+├── mcp/             — MCP server configs
+└── skills/          — OpenCode skills
+run_oc.ps1           — Entrypoint script
+opencode.json        — Project-level opencode config
+project-opencode.json— Project-level opencode config
 ```

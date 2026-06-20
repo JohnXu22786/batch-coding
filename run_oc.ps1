@@ -1,6 +1,7 @@
 param(
     [string]$instruction,
-    [string]$sessionId = ""
+    [string]$sessionId = "",
+    [string]$projectDir = ""
 )
 
 Add-Type -TypeDefinition @"
@@ -50,6 +51,9 @@ $sessions = @(tasklist //v //fi "IMAGENAME eq explorer.exe" 2>$null | Select-Str
 $winSession = if ($sessions.Count -gt 0) { [int]$sessions[0] } else { 1 }
 
 $dir = Split-Path -Parent $PSCommandPath
+if ($projectDir) {
+    $dir = $projectDir
+}
 if ($sessionId) {
     $cmd = "cmd.exe /c opencode --dir ""$dir"" -s ""$sessionId"" --format json ""$instruction"""
 } else {
