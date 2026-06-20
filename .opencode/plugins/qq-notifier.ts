@@ -207,16 +207,19 @@ const plugin: Plugin = async (_ctx) => {
   }
 
   const { client } = _ctx;
+  const notifiedSessions = new Set<string>();
 
   return {
     event: async ({ event }) => {
       if (event.type !== "session.idle") return;
+      const sessionId = event.properties.sessionID || "";
+      if (!sessionId || notifiedSessions.has(sessionId)) return;
+      notifiedSessions.add(sessionId);
 
       try {
         const now = new Date().toLocaleString("zh-CN", {
           timeZone: "Asia/Shanghai",
         });
-        const sessionId = event.properties.sessionID || "";
         const snippet = await getLastAssistantReply(client, sessionId);
         const projectPath = process.cwd();
         const shortId = sessionId || "未知";
