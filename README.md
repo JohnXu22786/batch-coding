@@ -11,7 +11,7 @@ Batch code editing dispatcher for OpenCode.
 调用格式：
 ```
 terminal(
-  command="powershell -ExecutionPolicy Bypass -File "D:\path\to\run_oc.ps1" -instruction "<完整指令>"",
+  command="powershell -ExecutionPolicy Bypass -File ""D:\path\to\run_oc.ps1"" -instruction ""<完整指令>""",
   background=true,
   timeout=86400
 )
