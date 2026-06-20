@@ -1,13 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "permission": {
-    "read": "deny",
-    "edit": "deny",
-    "glob": "deny",
-    "grep": "deny",
-    "bash": "deny",
-    "webfetch": "deny",
-    "task": "deny",
     "external_directory": {
       "*": "allow"
     }
@@ -18,7 +11,7 @@
       "command": [
         "test-checklist-mcp"
       ],
-      "enabled": false
+      "enabled": true
     },
     "batch-prompt": {
       "type": "local",
@@ -33,11 +26,20 @@
   "experimental": {
     "mcp_timeout": 86400000
   },
-  "default_agent": "batch",
-  "plugin": [
-    "./.opencode/plugins/qq-notifier.ts"
-  ],
+  "default_agent": "coding",
   "agent": {
+    "coding": {
+      "mode": "primary",
+      "description": "Project coding workflow with 6 phases"
+    },
+    "reviewer": {
+      "mode": "subagent",
+      "description": "Review code changes for correctness, scope, simplicity, and test coverage"
+    },
+    "release": {
+      "description": "Git Release manager using Trunk-Based + Release Branch model. Handles branching, tagging, CI checks, and cleanup.",
+      "mode": "primary"
+    },
     "batch": {
       "mode": "primary",
       "description": "Batch dispatcher for multiple modification requests"

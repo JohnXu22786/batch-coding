@@ -29,9 +29,18 @@ interface QQConfig {
 }
 
 function systemNotify(title: string, body: string): void {
+  // Windows SYSTEM 账户下无桌面会话，跳过系统通知
+  if (process.platform === "win32") {
+    try {
+      // 检查是否能加载 WinForms — SYSTEM 下会抛异常
+      require("System.Windows.Forms");
+    } catch {
+      return; // 无 UI 权限，跳过
+    }
+  }
   try {
-    const t = title.replace(/"/g, '\\"').replace(/'/g, "''");
-    const b = body.replace(/"/g, '\\"').replace(/'/g, "''");
+    const t = title.replace(/\"/g, '\\"').replace(/'/g, "''");
+    const b = body.replace(/\"/g, '\\"').replace(/'/g, "''");
     const plat = process.platform;
 
     if (plat === "darwin") {
@@ -212,7 +221,7 @@ const plugin: Plugin = async (_ctx) => {
         const projectPath = process.cwd();
         const shortId = sessionId || "未知";
 
-        let message = `✅ OpenCode 任务完成\n━━━━━━━━━━━━━━━━\n📁 ${projectPath}\n🕐 ${now}\n🔗 ${shortId}`;
+        let message = `✅ OpenCode Task Complete\n━━━━━━━━━━━━━━━━━━\n📁 ${projectPath}\n🕐 ${now}\n🔗 ${shortId}`;
         if (snippet) {
           const maxLen = 2000 - message.length - 50;
           const trimmed = snippet.length > maxLen ? snippet.slice(0, maxLen) + "…" : snippet;
