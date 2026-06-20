@@ -121,22 +121,10 @@ function setupWorktreeDir(worktreePath) {
     }
   }
 
-  const skillsSrc = path.join(BATCH_DIR, '.opencode', 'skills');
-  const skillsDest = path.join(resolvedPath, '.opencode', 'skills');
-  if (fs.existsSync(skillsSrc)) {
-    copyDir(skillsSrc, skillsDest);
-  }
-
-  const agentSrc = path.join(BATCH_DIR, '.opencode', 'agent');
-  const agentDest = path.join(resolvedPath, '.opencode', 'agent');
-  if (fs.existsSync(agentSrc)) {
-    copyDir(agentSrc, agentDest);
-  }
-
-  const mcpSrc = path.join(BATCH_DIR, '.opencode', 'mcp');
-  const mcpDest = path.join(resolvedPath, '.opencode', 'mcp');
-  if (fs.existsSync(mcpSrc)) {
-    copyDir(mcpSrc, mcpDest);
+  const opencodeSrc = path.join(BATCH_DIR, '.opencode');
+  const opencodeDest = path.join(resolvedPath, '.opencode');
+  if (fs.existsSync(opencodeSrc)) {
+    copyDir(opencodeSrc, opencodeDest);
   }
 
   return resolvedPath;

@@ -198,32 +198,6 @@ async function sendQQMessage(config: QQConfig, message: string): Promise<void> {
   }
 }
 
-/** 检查 session 是否真正完成（最后一条消息有 step-finish + reason stop） */
-async function isSessionDone(
-  client: PluginInput["client"],
-  sessionID: string,
-): Promise<boolean> {
-  try {
-    const result = await client.session.messages({
-      path: { id: sessionID },
-      query: { limit: 3 },
-    }) as { data?: Array<Record<string, unknown>>; error?: unknown };
-    if (!result.data || !Array.isArray(result.data)) return false;
-    for (let i = result.data.length - 1; i >= 0; i--) {
-      const m = result.data[i];
-      const info = m?.info as { role?: string } | undefined;
-      if (info?.role !== "assistant") continue;
-      const parts = (m?.parts ?? []) as Array<Record<string, unknown>>;
-      // Check if this assistant message has a step-finish with reason "stop"
-      const hasFinalStop = parts.some(
-        (p) => p.type === "step-finish" && p.reason === "stop",
-      );
-      return hasFinalStop;
-    }
-    return false;
-  } catch { return false; }
-}
-
 const plugin: Plugin = async (_ctx) => {
   const config = loadConfig();
 
@@ -234,17 +208,34 @@ const plugin: Plugin = async (_ctx) => {
 
   const { client } = _ctx;
   const notifiedSessions = new Set<string>();
+  const subagentSessions = new Set<string>();
 
   return {
     event: async ({ event }) => {
-      if (event.type !== "session.status") return;
-      const status = (event as any).properties?.status;
-      if (!status || status.type !== "idle") return;
-      const sessionId = (event as any).properties?.sessionID || "";
-      if (!sessionId || notifiedSessions.has(sessionId)) return;
+      const evt = event as any;
+      const sessionId = evt.properties?.sessionID || "";
 
-      // Only fire if the session is truly done
-      if (!(await isSessionDone(client, sessionId))) return;
+      // Track subagent sessions (those with a parentID)
+      if (event.type === "session.created" || event.type === "session.updated") {
+        const parentId = evt.properties?.info?.parentID;
+        if (parentId && sessionId) {
+          subagentSessions.add(sessionId);
+        }
+        return;
+      }
+
+      if (event.type === "session.deleted") {
+        if (sessionId) {
+          subagentSessions.delete(sessionId);
+          notifiedSessions.delete(sessionId);
+        }
+        return;
+      }
+
+      // Only notify on main agent session.idle, not subagent
+      if (event.type !== "session.idle") return;
+      if (!sessionId || notifiedSessions.has(sessionId)) return;
+      if (subagentSessions.has(sessionId)) return;
       notifiedSessions.add(sessionId);
 
       try {
