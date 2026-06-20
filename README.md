@@ -1,21 +1,45 @@
 # OpenCode Batch
 
-项目说明和工具文件。
+Batch code editing dispatcher for OpenCode.
 
-## 文件
+## 唯一入口
 
 | 文件 | 用途 |
 |------|------|
-| `run_oc.bat` | opencode 执行器，调用 `opencode run --format json` |
-| `launch_oc.vbs` | VBS 脚本，用 `WScript.Shell.Run` 隐藏窗口启动 `run_oc.bat` |
-| `PsExec64.exe` | 辅助工具，用于在用户会话中启动进程 |
-| `.opencode/plugins/qq-notifier.ts` | QQ Bot 通知插件，任务完成时发通知（英文消息） |
-| `.opencode/agent/` | OpenCode 规则文件 |
-| `.env` | 项目环境变量 |
+| `run_oc.ps1` | 以当前登录用户身份启动 opencode（从 SYSTEM 切换身份） |
 
-## 改动记录
+调用格式：
+```
+terminal(
+  command="powershell -ExecutionPolicy Bypass -File "D:\path\to\run_oc.ps1" -instruction "<完整指令>"",
+  background=true,
+  timeout=86400
+)
+```
 
-### 2026-06-20
-- `qq-notifier.ts`: 通知消息改英文 `"✅ OpenCode Task Complete"`
-- `run_oc.bat`: 使用 opencode.exe 完整路径，输出到本目录
-- `launch_oc.vbs`: 引用 Batch 目录下的 `run_oc.bat`
+- `background=true` — 不阻塞，后台执行
+- `timeout=86400` — 24 小时超时
+- 通知由 opencode QQ notifier 插件完成，无需 Hermes 额外通知
+
+## 前置条件
+
+- `npm install -g opencode-ai`（opencode 全局可用）
+- Windows 环境，Hermes Gateway 以 SYSTEM 运行
+- 用户已登录到桌面（session 1）
+
+## 配置
+
+QQ Bot 通知、API key 等敏感信息在 `.env`（已 gitignore），不提交到仓库。
+
+## 目录结构
+
+```
+.opencode/
+├── agent/           — OpenCode 规则文件（batch、coding、reviewer）
+├── plugins/         — 插件（qq-notifier 等）
+├── mcp/             — MCP 服务器配置
+└── skills/          — OpenCode 技能
+run_oc.ps1           — 唯一入口脚本
+opencode.json        — 项目级 opencode 配置
+project-opencode.json— 项目级 opencode 配置
+```
