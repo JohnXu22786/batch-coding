@@ -34,7 +34,7 @@ public class UProc {
             DestroyEnvironmentBlock(e); CloseHandle(dt); return (uint)Marshal.GetLastWin32Error();
         }
         DestroyEnvironmentBlock(e); CloseHandle(dt);
-        WaitForSingleObject(pi.hProcess,120000);
+        WaitForSingleObject(pi.hProcess,0xFFFFFFFF); // wait forever
         uint ec; GetExitCodeProcess(pi.hProcess,out ec);
         CloseHandle(pi.hProcess); CloseHandle(pi.hThread);
         return ec;
