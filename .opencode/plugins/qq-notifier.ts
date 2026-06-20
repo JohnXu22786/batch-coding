@@ -210,21 +210,24 @@ const plugin: Plugin = async (_ctx) => {
   const notifiedSessions = new Set<string>();
 
   return {
-    event: async ({ event }) => {
-      if (event.type !== "session.idle") return;
-      const sessionId = event.properties.sessionID || "";
+    "chat.message": async (_input, output) => {
+      const hasStop = output.parts.some(
+        (p) => (p as any).type === "step-finish" && (p as any).reason === "stop",
+      );
+      if (!hasStop) return;
+
+      const sessionId = _input.sessionID || "";
       if (!sessionId || notifiedSessions.has(sessionId)) return;
       notifiedSessions.add(sessionId);
 
       try {
+        const snippet = await getLastAssistantReply(client, sessionId);
         const now = new Date().toLocaleString("zh-CN", {
           timeZone: "Asia/Shanghai",
         });
-        const snippet = await getLastAssistantReply(client, sessionId);
         const projectPath = process.cwd();
-        const shortId = sessionId || "未知";
 
-        let message = `✅ OpenCode Task Complete\n━━━━━━━━━━━━━━━━━━\n📁 ${projectPath}\n🕐 ${now}\n🔗 ${shortId}`;
+        let message = `✅ OpenCode Task Complete\n━━━━━━━━━━━━━━━━━━\n📁 ${projectPath}\n🕐 ${now}\n🔗 ${sessionId}`;
         if (snippet) {
           const maxLen = 2000 - message.length - 50;
           const trimmed = snippet.length > maxLen ? snippet.slice(0, maxLen) + "…" : snippet;
