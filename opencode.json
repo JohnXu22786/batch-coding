@@ -26,7 +26,7 @@
   "experimental": {
     "mcp_timeout": 86400000
   },
-  "default_agent": "coding",
+  "default_agent": "batch",
   "agent": {
     "coding": {
       "mode": "primary",

@@ -1,4 +1,7 @@
-param([string]$instruction)
+param(
+    [string]$instruction,
+    [string]$sessionId = ""
+)
 
 Add-Type -TypeDefinition @"
 using System;
@@ -44,9 +47,13 @@ public class UProc {
 
 # Detect active user session (skip services session 0)
 $sessions = @(tasklist //v //fi "IMAGENAME eq explorer.exe" 2>$null | Select-String -Pattern "Console\s+(\d+)" | ForEach-Object { $_.Matches.Groups[1].Value })
-$sessionId = if ($sessions.Count -gt 0) { [int]$sessions[0] } else { 1 }
+$winSession = if ($sessions.Count -gt 0) { [int]$sessions[0] } else { 1 }
 
 $dir = Split-Path -Parent $PSCommandPath
-$cmd = "cmd.exe /c opencode run --dir ""$dir"" --format json ""$instruction"""
-$ec = [UProc]::Run($sessionId, $cmd, $dir)
+if ($sessionId) {
+    $cmd = "cmd.exe /c opencode --dir ""$dir"" --session ""$sessionId"" --format json ""$instruction"""
+} else {
+    $cmd = "cmd.exe /c opencode run --dir ""$dir"" --format json ""$instruction"""
+}
+$ec = [UProc]::Run($winSession, $cmd, $dir)
 Write-Host "exit:$ec"

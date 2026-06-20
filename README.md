@@ -7,11 +7,21 @@ Batch code editing dispatcher for OpenCode.
 | 文件 | 用途 |
 |------|------|
 | `run_oc.ps1` | 以当前登录用户身份启动 opencode（从 SYSTEM 切换身份） |
+## 调用格式
 
-调用格式：
+**创建新 session：**
 ```
 terminal(
-  command="powershell -ExecutionPolicy Bypass -File ""D:\path\to\run_oc.ps1"" -instruction ""<完整指令>""",
+  command="powershell -ExecutionPolicy Bypass -File ""D:\path\to\run_oc.ps1"" -instruction ""<full instruction>""",
+  background=true,
+  timeout=86400
+)
+```
+
+**继续已有 session：**
+```
+terminal(
+  command="powershell -ExecutionPolicy Bypass -File ""D:\path\to\run_oc.ps1"" -instruction ""<full instruction>"" -sessionId ""ses_xxxxxxxxxxxxxxx""",
   background=true,
   timeout=86400
 )
