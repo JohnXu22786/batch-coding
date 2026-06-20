@@ -42,8 +42,11 @@ public class UProc {
 }
 "@
 
-$opencode = "C:\Users\22786\AppData\Roaming\npm\node_modules\opencode-ai\bin\opencode.exe"
-$dir = "D:\Administrator\Desktop\OpenCode Batch"
-$cmd = "$opencode run --dir ""$dir"" --format json ""$instruction"""
-$ec = [UProc]::Run(1, $cmd, $dir)
+# Detect active user session (skip services session 0)
+$sessions = @(tasklist //v //fi "IMAGENAME eq explorer.exe" 2>$null | Select-String -Pattern "Console\s+(\d+)" | ForEach-Object { $_.Matches.Groups[1].Value })
+$sessionId = if ($sessions.Count -gt 0) { [int]$sessions[0] } else { 1 }
+
+$dir = Split-Path -Parent $PSCommandPath
+$cmd = "cmd.exe /c opencode run --dir ""$dir"" --format json ""$instruction"""
+$ec = [UProc]::Run($sessionId, $cmd, $dir)
 Write-Host "exit:$ec"
