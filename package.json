@@ -1,0 +1,7 @@
+{
+  "name": "opencode-batch",
+  "private": true,
+  "workspaces": [
+    ".opencode/mcp/batch-prompt"
+  ]
+}
