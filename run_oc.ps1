@@ -57,7 +57,7 @@ if ($projectDir) {
 }
 $agentFlag = if ($agent) { " --agent ""$agent""" } else { "" }
 if ($sessionId) {
-    $cmd = "cmd.exe /c opencode --dir ""$dir"" -s ""$sessionId"" --format json$agentFlag ""$instruction"""
+    $cmd = "cmd.exe /c opencode run --dir ""$dir"" -s ""$sessionId"" --format json$agentFlag ""$instruction"""
 } else {
     $cmd = "cmd.exe /c opencode run --dir ""$dir"" --format json$agentFlag ""$instruction"""
 }
