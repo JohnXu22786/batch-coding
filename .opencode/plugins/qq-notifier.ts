@@ -18,6 +18,8 @@ import { homedir } from "os";
 import { join } from "path";
 import { execSync } from "child_process";
 
+type EventPayload = Record<string, unknown>;
+
 const QQ_TOKEN_URL = "https://bots.qq.com/app/getAppAccessToken";
 const QQ_API_BASE = "https://api.sgroup.qq.com";
 
@@ -163,39 +165,53 @@ async function getAccessToken(config: QQConfig): Promise<string> {
   return data.access_token as string;
 }
 
-async function sendQQMessage(config: QQConfig, message: string): Promise<void> {
+async function sendQQMessage(
+  config: QQConfig,
+  header: string,
+  body?: string,
+): Promise<void> {
   const token = await getAccessToken(config);
   const headers = {
     Authorization: `QQBot ${token}`,
     "Content-Type": "application/json",
   };
-  const payload = { content: message.slice(0, 4000), msg_type: 0 };
 
-  const primaryUrl =
-    config.type === "group"
-      ? `${QQ_API_BASE}/v2/groups/${config.target}/messages`
-      : `${QQ_API_BASE}/v2/users/${config.target}/messages`;
+  const trySend = async (
+    url: string,
+    payload: Record<string, unknown>,
+  ): Promise<boolean> => {
+    const resp = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+    return resp.ok || /^2\d\d$/.test(resp.status.toString());
+  };
 
-  const resp = await fetch(primaryUrl, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
+  const userUrl = `${QQ_API_BASE}/v2/users/${config.target}/messages`;
+  const groupUrl = `${QQ_API_BASE}/v2/groups/${config.target}/messages`;
+  const primaryUrl = config.type === "group" ? groupUrl : userUrl;
+  const fallbackUrl = config.type === "group" ? userUrl : groupUrl;
+
+  const message = body ? `${header}\n\n${body}` : header;
+
+  const mdOk = await trySend(primaryUrl, {
+    msg_type: 2,
+    markdown: { content: message },
   });
-  if (resp.ok || resp.status.toString().match(/^2\d\d$/)) return;
+  if (mdOk) return;
 
-  // Fallback
-  const fallbackUrl =
-    config.type === "group"
-      ? `${QQ_API_BASE}/v2/users/${config.target}/messages`
-      : `${QQ_API_BASE}/v2/groups/${config.target}/messages`;
-  const fb = await fetch(fallbackUrl, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
+  const textOk = await trySend(primaryUrl, {
+    content: message.slice(0, 4000),
+    msg_type: 0,
   });
-  if (!fb.ok && !fb.status.toString().match(/^2\d\d$/)) {
-    throw new Error(`QQ 发送失败: primary=${resp.status} fallback=${fb.status}`);
-  }
+  if (textOk) return;
+
+  const fbOk = await trySend(fallbackUrl, {
+    content: message.slice(0, 4000),
+    msg_type: 0,
+  });
+  if (!fbOk) throw new Error("QQ 发送失败");
 }
 
 const plugin: Plugin = async (_ctx) => {
@@ -207,15 +223,21 @@ const plugin: Plugin = async (_ctx) => {
   }
 
   const { client } = _ctx;
-  const notifiedSessions = new Set<string>();
   const subagentSessions = new Set<string>();
+  const forwardedContent = new Map<string, string>();
+  const projectPath = process.cwd();
+
+  const now = () =>
+    new Date().toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
+
+  const baseHeader = (icon: string, title: string) =>
+    `${icon} ${title}\n━━━━━━━━━━━━━━━━━━\n📁 ${projectPath}\n🕐 ${now()}`;
 
   return {
     event: async ({ event }) => {
       const evt = event as any;
       const sessionId = evt.properties?.sessionID || "";
 
-      // Track subagent sessions (those with a parentID)
       if (event.type === "session.created" || event.type === "session.updated") {
         const parentId = evt.properties?.info?.parentID;
         if (parentId && sessionId) {
@@ -227,37 +249,80 @@ const plugin: Plugin = async (_ctx) => {
       if (event.type === "session.deleted") {
         if (sessionId) {
           subagentSessions.delete(sessionId);
-          notifiedSessions.delete(sessionId);
+          forwardedContent.delete(sessionId);
         }
         return;
       }
 
-      // Only notify on main agent session.idle, not subagent
-      if (event.type !== "session.idle") return;
-      if (!sessionId || notifiedSessions.has(sessionId)) return;
-      if (subagentSessions.has(sessionId)) return;
-      notifiedSessions.add(sessionId);
+      // Forward new assistant replies on idle
+      if (event.type === "session.idle") {
+        if (!sessionId || subagentSessions.has(sessionId)) return;
 
-      try {
-        const snippet = await getLastAssistantReply(client, sessionId);
-        const now = new Date().toLocaleString("zh-CN", {
-          timeZone: "Asia/Shanghai",
-        });
-        const projectPath = process.cwd();
+        try {
+          const snippet = await getLastAssistantReply(client, sessionId);
+          if (!snippet) return;
 
-        let message = `✅ OpenCode Task Complete\n━━━━━━━━━━━━━━━━━━\n📁 ${projectPath}\n🕐 ${now}\n🔗 ${sessionId}`;
-        if (snippet) {
-          const maxLen = 2000 - message.length - 50;
-          const trimmed = snippet.length > maxLen ? snippet.slice(0, maxLen) + "…" : snippet;
-          message += `\n\n💬 ${trimmed}`;
+          const last = forwardedContent.get(sessionId);
+          if (snippet === last) return;
+          forwardedContent.set(sessionId, snippet);
+
+          await sendQQMessage(
+            config!,
+            baseHeader("✅", "OpenCode Task Complete"),
+            `🔗 ${sessionId}\n\n💬 ${snippet}`,
+          );
+        } catch (err) {
+          systemNotify("OpenCode QQ 通知 - 失败", String(err).slice(0, 120));
         }
+        return;
+      }
 
-        await sendQQMessage(config!, message);
-      } catch (err) {
-        systemNotify(
-          "OpenCode QQ 通知 - 失败",
-          String(err).slice(0, 120),
-        );
+      // Forward errors
+      if (event.type === "session.error") {
+        if (!sessionId || subagentSessions.has(sessionId)) return;
+
+        try {
+          const errInfo = evt.properties?.error as EventPayload | undefined;
+          const errName =
+            typeof errInfo?.name === "string" ? errInfo.name : "UnknownError";
+          const errMsg =
+            typeof errInfo?.message === "string" ? errInfo.message : "";
+
+          // Skip user cancellation silently
+          if (errName === "MessageAbortedError") return;
+
+          const body = errMsg
+            ? `🔗 ${sessionId}\n\n⚠️ ${errName}\n${errMsg}`
+            : `🔗 ${sessionId}\n\n⚠️ ${errName}`;
+
+          await sendQQMessage(config!, baseHeader("❌", "OpenCode Error"), body);
+        } catch (err) {
+          systemNotify("OpenCode QQ 通知 - 失败", String(err).slice(0, 120));
+        }
+        return;
+      }
+    },
+
+    "tool.execute.before": async (input) => {
+      if (!subagentSessions.has((input as any).sessionID)) {
+        if ((input as any).tool === "question") {
+          const q = (input as any).input?.question;
+          const body = q
+            ? `💬 ${q}`
+            : "The assistant has a question for you.";
+          await sendQQMessage(config!, baseHeader("❓", "OpenCode Question"), body).catch(
+            (err) => systemNotify("OpenCode QQ 通知 - 失败", String(err).slice(0, 120)),
+          );
+        }
+        if ((input as any).tool === "plan_exit") {
+          await sendQQMessage(
+            config!,
+            baseHeader("📋", "OpenCode Plan Ready"),
+            "The assistant has finished planning and is ready for review.",
+          ).catch((err) =>
+            systemNotify("OpenCode QQ 通知 - 失败", String(err).slice(0, 120)),
+          );
+        }
       }
     },
   };
