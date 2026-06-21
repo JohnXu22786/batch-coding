@@ -133,26 +133,32 @@ async function sendQQMessage(
 
   const message = body ? `${header}\n\n${body}` : header;
 
-  // Try markdown first
-  const mdOk = await trySend(primaryUrl, {
-    msg_type: 2,
-    markdown: { content: message },
-  });
+  // 1) Markdown — no limit
+  const mdOk = await trySend(primaryUrl, { msg_type: 2, markdown: { content: message } });
   if (mdOk) return;
 
-  // Fallback to text
-  const textOk = await trySend(primaryUrl, {
-    content: message.slice(0, 4000),
-    msg_type: 0,
-  });
+  // 2) Text full content — no truncation
+  const textOk = await trySend(primaryUrl, { content: message, msg_type: 0 });
   if (textOk) return;
 
-  // Fallback to other endpoint type
-  const fbOk = await trySend(fallbackUrl, {
-    content: message.slice(0, 4000),
-    msg_type: 0,
-  });
-  if (!fbOk) throw new Error("QQ send failed");
+  // 3) Text fallback URL
+  const fbOk = await trySend(fallbackUrl, { content: message, msg_type: 0 });
+  if (fbOk) return;
+
+  // 4) Last resort: split into ~4000-char chunks
+  let remaining = message;
+  const chunks: string[] = [];
+  while (remaining.length > 0) {
+    const end = remaining.lastIndexOf("\n", 3990) > 0 ? remaining.lastIndexOf("\n", 3990) : 3990;
+    chunks.push(remaining.slice(0, end));
+    remaining = remaining.slice(end).trimStart();
+  }
+
+  for (let i = 0; i < chunks.length; i++) {
+    const prefix = chunks.length > 1 ? `(${i + 1}/${chunks.length}) ` : "";
+    const ok = await trySend(primaryUrl, { content: prefix + chunks[i], msg_type: 0 });
+    if (!ok) throw new Error(`QQ send failed at chunk ${i + 1}/${chunks.length}`);
+  }
 }
 
 const plugin: Plugin = async (_ctx) => {
@@ -226,7 +232,7 @@ const plugin: Plugin = async (_ctx) => {
           await sendQQMessage(
             config!,
             baseHeader("✅", "OpenCode Task Complete"),
-            `🔗 ${sessionId}\n\n💬 ${snippet.slice(0, 3500)}`,
+            `🔗 ${sessionId}\n\n💬 ${snippet}`,
           );
         } catch {
           // silent
