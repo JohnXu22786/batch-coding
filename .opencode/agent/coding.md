@@ -91,7 +91,7 @@ LEAD reviews each issue and decides: fix needed or over-engineering.
 
 ## Phase 5: RUN TESTS
 
-Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Run what you've written to test the changes first, When all passed, run full suite. This order is to improve efficiency.
+Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Run tests you've written to verify changes.
 
 **If all pass:**
 - Go to step 6 (REPORT DONE)
