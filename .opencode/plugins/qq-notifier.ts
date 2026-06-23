@@ -7,7 +7,7 @@
  * - question tool call (explicit question)
  * - plan_exit tool call (plan ready for review)
  *
- * Env vars (project .env or ~/.hermes/.env):
+ * Env vars (user environment variables):
  *   QQ_APP_ID          Your AppID
  *   QQ_CLIENT_SECRET   Your Secret
  *   QQ_NOTIFY_TARGET   Target user openid or group openid
@@ -174,7 +174,7 @@ const plugin: Plugin = async (_ctx) => {
     new Date().toLocaleString("en-US", { timeZone: "Asia/Shanghai" });
 
   const baseHeader = (icon: string, title: string) =>
-    `${icon} ${title}\n${"─".repeat(20)}\n📁 ${projectPath}\n🕐 ${now()}`;
+    `${icon} ${title}\n${"\u2500".repeat(20)}\n📁 ${projectPath}\n🕐 ${now()}`;
 
   return {
     event: async ({ event }) => {

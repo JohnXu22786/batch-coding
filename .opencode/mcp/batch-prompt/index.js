@@ -9,6 +9,7 @@ import {
   McpError,
   ErrorCode,
 } from "@modelcontextprotocol/sdk/types.js";
+import { notifyQQ } from "./notify.js";
 
 const server = new Server(
   { name: "batch-prompt-mcp", version: "1.0.0" },
@@ -203,10 +204,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     opencodeRunning = true;
     try {
       const { stdout, stderr, code } = await runOpenCode(resolvedPath, instruction);
-      if (code !== 0) {
-        throw new McpError(ErrorCode.InternalError,
-          `opencode_run failed (exit ${code}): ${(stderr || stdout).substring(0, 2000)}`);
-      }
 
       let sessionId = '';
       for (const line of stdout.split('\n')) {
@@ -215,6 +212,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           if (evt.sessionID) sessionId = evt.sessionID;
         } catch (e) {}
       }
+
+      if (code !== 0) {
+        await notifyQQ({ ok: false, sessionId, stdout, stderr });
+        throw new McpError(ErrorCode.InternalError,
+          `opencode_run failed (exit ${code}): ${(stderr || stdout).substring(0, 2000)}`);
+      }
+
+      await notifyQQ({ ok: true, sessionId, stdout, stderr });
 
       return {
         content: [{
@@ -243,10 +248,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     opencodeRunning = true;
     try {
       const { stdout, stderr, code } = await runOpenCode(resolvedPath, instruction, sessionId);
+
       if (code !== 0) {
+        await notifyQQ({ ok: false, sessionId, stdout, stderr });
         throw new McpError(ErrorCode.InternalError,
           `opencode_continue failed (exit ${code}): ${(stderr || stdout).substring(0, 2000)}`);
       }
+
+      await notifyQQ({ ok: true, sessionId, stdout, stderr });
 
       return {
         content: [{
