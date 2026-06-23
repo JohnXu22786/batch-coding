@@ -39,15 +39,14 @@ When writing tests, use `test_checklist` MCP tools:
 
 ## Phase 3: EDIT
 
+Follow these rules:
+
 1. Follow the patterns: Read other current codes to understand existing patterns first. Use the same logic or UI etc.
 
 2. **Data Migration**: Design a data migration if old data format cannot match new design. Please note that some may seem harmless, but when you install a new version, it will crash, though it won't when there is no old version data. The migration should start when new version installed and app launched. Use a pop to show user the progress and let user know the app restarts to take effect. Use new format only - no compatibility layer. Migration must be idempotent and atomic where possible.
 
-3. **Simplicity First**
+3. **Simplicity First**: Minimum code that solves the problem. Nothing speculative.
 
-**Minimum code that solves the problem. Nothing speculative.**
-
-- Match existing code style
 - Every changed line must trace to the user's request
 - No features beyond what was asked.
 - No abstractions for single-use code.
@@ -60,9 +59,7 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 
 If your changes make the single code file big, take it apart. No large files.
 
-4. **Surgical Changes**
-
-**Touch only what you must. Clean up only your own mess.**
+4. **Surgical Changes**: Touch only what you must. Clean up only your own mess.
 
 When editing existing code:
 - Don't "improve" adjacent code, comments, or formatting.
@@ -73,8 +70,6 @@ When editing existing code:
 When your changes create orphans:
 - Remove imports/variables/functions that YOUR changes made unused.
 - Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
 
 ---
 
@@ -91,7 +86,7 @@ LEAD reviews each issue and decides: fix needed or over-engineering.
 
 ## Phase 5: RUN TESTS
 
-Runs all tests you've made in `2. WRITE TEST` and fix all the issues found. Run tests you've written to verify changes.
+Runs all tests you've made in `Phase 2: WRITE TESTS` and fix all the issues found. Run tests you've written to verify changes.
 
 **If all pass:**
 - Go to step 6 (REPORT DONE)
@@ -127,3 +122,12 @@ Report to user:
 - What you have done in the 6 phases above, and whether you have followed these in the right order
 - What issues or problems you have encountered during the session (not trivial problems like you made a grammar mistake or so)
 
+---
+
+Notes on conflict resolution:
+
+When you execute `git rebase main` and encounter a conflict, you must recognize that the code on the `main` branch represents the latest, verified, and correct production environment.
+
+Unless your task is specifically to modify that particular logic, when resolving conflicts, you must strictly retain the code from the `main` branch (i.e., the HEAD side), and only merge in the "incremental new features" from your own branch.
+
+It is absolutely not allowed to directly overwrite existing code on the `main` branch with the outdated context from your branch.
