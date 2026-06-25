@@ -20,6 +20,7 @@ const server = new Server(
 let opencodeRunning = false;
 let lastInnerSessionId = '';
 let lastInnerStdout = '';
+let lastInnerDir = '';
 
 const OPENCODE_EXE = process.env.OPENCODE_CLI || 'opencode';
 const BATCH_DIR = path.resolve(path.dirname(process.argv[1]), '..', '..', '..');
@@ -223,6 +224,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       lastInnerSessionId = sessionId;
       lastInnerStdout = stdout;
+      lastInnerDir = resolvedPath;
 
       return {
         content: [{
@@ -260,6 +262,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       lastInnerSessionId = sessionId;
       lastInnerStdout = stdout;
+      lastInnerDir = resolvedPath;
 
       return {
         content: [{
@@ -286,5 +289,5 @@ process.on('beforeExit', () => {
   if (opencodeRunning || notifiedExit || isInnerMCP) return;
   notifiedExit = true;
   if (!lastInnerSessionId) return;
-  notifyQQ({ ok: true, sessionId: lastInnerSessionId, stdout: lastInnerStdout, stderr: '' }).catch(() => {});
+  notifyQQ({ ok: true, sessionId: lastInnerSessionId, stdout: lastInnerStdout, stderr: '', dir: lastInnerDir }).catch(() => {});
 });

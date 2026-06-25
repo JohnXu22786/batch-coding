@@ -110,13 +110,13 @@ function now() {
   return new Date().toLocaleString("en-US", { timeZone: "Asia/Shanghai" });
 }
 
-function baseHeader(icon, title) {
-  return `${icon} ${title}\n${"\u2500".repeat(20)}\n📁 ${process.cwd()}\n🕐 ${now()}`;
+function baseHeader(icon, title, dir) {
+  return `${icon} ${title}\n${"\u2500".repeat(20)}\n📁 ${dir || process.cwd()}\n🕐 ${now()}`;
 }
 
 const sentSessionIds = new Set();
 
-export async function notifyQQ({ ok, sessionId, stdout, stderr }) {
+export async function notifyQQ({ ok, sessionId, stdout, stderr, dir }) {
   const config = loadQQConfig();
   if (!config) return;
   if (sessionId && sentSessionIds.has(sessionId)) return;
@@ -127,10 +127,10 @@ export async function notifyQQ({ ok, sessionId, stdout, stderr }) {
       const body = snippet
         ? `🔗 ${sessionId}\n\n💬 ${snippet}`
         : `🔗 ${sessionId}`;
-      await sendQQMessage(config, baseHeader("✅", "OpenCode Task Complete"), body);
+      await sendQQMessage(config, baseHeader("✅", "OpenCode Task Complete", dir), body);
     } else {
       const errMsg = (stderr || stdout || "").substring(0, 500);
-      await sendQQMessage(config, baseHeader("❌", "OpenCode Error"), `🔗 ${sessionId}\n\n⚠️ ${errMsg}`);
+      await sendQQMessage(config, baseHeader("❌", "OpenCode Error", dir), `🔗 ${sessionId}\n\n⚠️ ${errMsg}`);
     }
   } catch (e) {
     // silent
