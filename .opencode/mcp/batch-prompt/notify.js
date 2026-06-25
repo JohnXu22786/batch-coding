@@ -25,7 +25,7 @@ function loadEnvFile(filePath) {
   }
 }
 
-export function loadQQConfig() {
+function loadQQConfig() {
   const projectEnv = loadEnvFile(join(process.cwd(), ".env"));
   const hermesEnv = loadEnvFile(join(homedir(), ".hermes", ".env"));
   const merged = { ...hermesEnv, ...projectEnv };
@@ -51,7 +51,7 @@ async function getQQAccessToken(config) {
   return data.access_token;
 }
 
-export async function sendQQMessage(config, header, body) {
+async function sendQQMessage(config, header, body) {
   const token = await getQQAccessToken(config);
   const headers = {
     Authorization: `QQBot ${token}`,
@@ -106,11 +106,11 @@ function extractTextSnippet(stdout) {
   return texts.join('\n').substring(0, 500);
 }
 
-export function now() {
+function now() {
   return new Date().toLocaleString("en-US", { timeZone: "Asia/Shanghai" });
 }
 
-export function baseHeader(icon, title) {
+function baseHeader(icon, title) {
   return `${icon} ${title}\n${"\u2500".repeat(20)}\n📁 ${process.cwd()}\n🕐 ${now()}`;
 }
 
