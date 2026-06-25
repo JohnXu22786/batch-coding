@@ -114,9 +114,13 @@ export function baseHeader(icon, title) {
   return `${icon} ${title}\n${"\u2500".repeat(20)}\n📁 ${process.cwd()}\n🕐 ${now()}`;
 }
 
+const sentSessionIds = new Set();
+
 export async function notifyQQ({ ok, sessionId, stdout, stderr }) {
   const config = loadQQConfig();
   if (!config) return;
+  if (sessionId && sentSessionIds.has(sessionId)) return;
+  if (sessionId) sentSessionIds.add(sessionId);
   try {
     if (ok) {
       const snippet = extractTextSnippet(stdout || "");

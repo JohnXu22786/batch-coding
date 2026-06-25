@@ -1,5 +1,6 @@
 import { spawn } from 'child_process';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -17,6 +18,8 @@ const server = new Server(
 );
 
 let opencodeRunning = false;
+let lastInnerSessionId = '';
+let lastInnerStdout = '';
 
 const OPENCODE_EXE = process.env.OPENCODE_CLI || 'opencode';
 const BATCH_DIR = path.resolve(path.dirname(process.argv[1]), '..', '..', '..');
@@ -225,12 +228,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       if (code !== 0) {
-        await notifyQQ({ ok: false, sessionId, stdout, stderr });
         throw new McpError(ErrorCode.InternalError,
           `opencode_run failed (exit ${code}): ${(stderr || stdout).substring(0, 2000)}`);
       }
 
-      await notifyQQ({ ok: true, sessionId, stdout, stderr });
+      lastInnerSessionId = sessionId;
+      lastInnerStdout = stdout;
 
       return {
         content: [{
@@ -266,7 +269,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           `opencode_continue failed (exit ${code}): ${(stderr || stdout).substring(0, 2000)}`);
       }
 
-      await notifyQQ({ ok: true, sessionId, stdout, stderr });
+      lastInnerSessionId = sessionId;
+      lastInnerStdout = stdout;
 
       return {
         content: [{
@@ -294,3 +298,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 const transport = new StdioServerTransport();
 await server.connect(transport);
+
+const __selfPath = fileURLToPath(import.meta.url);
+const isInnerMCP = __selfPath.includes(path.sep + 'worktrees' + path.sep);
+
+let notifiedExit = false;
+process.on('beforeExit', () => {
+  if (opencodeRunning || notifiedExit || isInnerMCP) return;
+  notifiedExit = true;
+  if (!lastInnerSessionId) return;
+  notifyQQ({ ok: true, sessionId: lastInnerSessionId, stdout: lastInnerStdout, stderr: '' }).catch(() => {});
+});
