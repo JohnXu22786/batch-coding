@@ -223,6 +223,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       lastInnerSessionId = sessionId;
       lastInnerStdout = stdout;
+      notifyQQ({ ok: true, sessionId, stdout, stderr }).catch(() => {});
 
       return {
         content: [{
