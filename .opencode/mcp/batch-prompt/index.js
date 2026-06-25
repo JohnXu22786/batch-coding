@@ -289,5 +289,5 @@ process.on('beforeExit', () => {
   if (opencodeRunning || notifiedExit || isInnerMCP) return;
   notifiedExit = true;
   if (!lastInnerSessionId) return;
-  notifyQQ({ ok: true, sessionId: lastInnerSessionId, stdout: lastInnerStdout, stderr: '', dir: lastInnerDir }).catch(() => {});
+  notifyQQ({ ok: true, sessionId: lastInnerSessionId, stdout: lastInnerStdout, stderr: '', dir: BATCH_DIR }).catch(() => {});
 });
