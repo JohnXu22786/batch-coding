@@ -1,39 +1,11 @@
-import { readFileSync, existsSync } from "fs";
-import { homedir } from "os";
-import { join } from "path";
-
 const QQ_TOKEN_URL = "https://bots.qq.com/app/getAppAccessToken";
 const QQ_API_BASE = "https://api.sgroup.qq.com";
 
-function loadEnvFile(filePath) {
-  if (!existsSync(filePath)) return {};
-  try {
-    const text = readFileSync(filePath, "utf-8");
-    const vars = {};
-    for (const line of text.split("\n")) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("#")) continue;
-      const eqIdx = trimmed.indexOf("=");
-      if (eqIdx === -1) continue;
-      const key = trimmed.slice(0, eqIdx).trim();
-      const val = trimmed.slice(eqIdx + 1).trim();
-      if (key && val) vars[key] = val;
-    }
-    return vars;
-  } catch {
-    return {};
-  }
-}
-
 function loadQQConfig() {
-  const projectEnv = loadEnvFile(join(process.cwd(), ".env"));
-  const hermesEnv = loadEnvFile(join(homedir(), ".hermes", ".env"));
-  const merged = { ...hermesEnv, ...projectEnv };
-
-  const appId = process.env.QQ_APP_ID || merged["QQ_APP_ID"] || "";
-  const clientSecret = process.env.QQ_CLIENT_SECRET || merged["QQ_CLIENT_SECRET"] || "";
-  const target = process.env.QQ_NOTIFY_TARGET || merged["QQ_NOTIFY_TARGET"] || "";
-  const notifyType = process.env.QQ_NOTIFY_TYPE || merged["QQ_NOTIFY_TYPE"] || "c2c";
+  const appId = process.env.QQ_APP_ID || "";
+  const clientSecret = process.env.QQ_CLIENT_SECRET || "";
+  const target = process.env.QQ_NOTIFY_TARGET || "";
+  const notifyType = process.env.QQ_NOTIFY_TYPE || "c2c";
   if (!appId || !clientSecret || !target) return null;
   return { appId, clientSecret, target, type: notifyType === "group" ? "group" : "c2c" };
 }
