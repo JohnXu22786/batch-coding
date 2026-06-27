@@ -83,7 +83,7 @@ terminal(
 
 - `background=true` — non-blocking, runs in background
 - `timeout=86400` — 24-hour timeout for long batch jobs
-- Notifications: `qq-notifier` plugin for TUI sessions, `batch-prompt` MCP with `notify.js` for `opencode run` sessions
+- `timeout=86400` — 24-hour timeout for long batch jobs
 
 ### Hermes Agent workflow
 
@@ -95,15 +95,14 @@ When calling from Hermes Agent:
 
 ## Configuration
 
-QQ Bot credentials, API keys etc. go in `.env` (gitignored). Not committed to the repo.
+API keys etc. go in `.env` (gitignored). Not committed to the repo.
 
 ## Directory structure
 
 ```
 .opencode/
 ├── agent/           — OpenCode rules (batch, coding, reviewer)
-├── plugins/         — Plugins (qq-notifier for TUI)
-├── mcp/             — MCP servers (batch-prompt, qq-notify, test-checklist)
+├── mcp/             — MCP servers (batch-prompt, test-checklist)
 └── skills/          — OpenCode skills
 run_oc.ps1           — Entrypoint script
 opencode.json        — Project-level opencode config

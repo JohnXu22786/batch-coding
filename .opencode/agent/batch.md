@@ -2,12 +2,11 @@
 
 ## Permitted Tools
 
-1. **MCP `create_branch_worktree`** – create branch + worktree
-2. **MCP `opencode_run`** – start a new opencode session (returns sessionId)
-3. **MCP `opencode_continue`** – continue an existing session by sessionId (requires instruction too)
-4. **todowrite**, **webfetch**
+1. **MCP `create_branch_worktree`** – create branch + worktree (also copies project config into worktree)
+2. **bash** – only for running `opencode run --dir`
+3. **todowrite**, **webfetch**
 
-All other tools **forbidden** (Read, Write, Glob, Grep, bash, task, skill, test_checklist).
+All other tools **forbidden** (Read, Write, Glob, Grep, task, skill, test_checklist).
 
 Remember to use quote to make sure the parameter is correctly passed to MCP tools.
 
@@ -50,20 +49,23 @@ Tool auto-detects default branch (main>master>dev), creates branch and worktree.
 
 ### 2.2 Apply Changes
 
-Call `opencode_run` with:
+Run `opencode run` via bash:
 
-| Parameter | Value |
-|-----------|-------|
-| `path` | {worktree-path} |
-| `instruction` | User's **original wording** per request in this batch, line by line. Append: `Please carefully understand the requirements — what I want and what the standard is. And always follow the 7 phases in the system prompt, no skipping, no excuses.` |
+| Argument | Value |
+|----------|-------|
+| `--dir` | {worktree-path} |
+| `--agent` | (optional) Agent name, e.g. `coding`, if you want a specific agent |
+| instruction | User's **original wording** per request in this batch, line by line. Append: `Please carefully understand the requirements — what I want and what the standard is. And always follow the 7 phases in the system prompt, no skipping, no excuses.` |
 
-Returns `{sessionId}` when the tool finishes. Do NOT set any timeout or interrupt. Do NOT call `opencode_run` in parallel. Finish the group one by one. Proceed to next batch immediately when it finishes.
+Command: `opencode run --dir "{worktree-path}" --agent "{agent}" "{instruction}"` (omit `--agent` if not specified)
+
+Wait for the command to finish. Do NOT set any timeout or interrupt. Do NOT run multiple `opencode run` in parallel. Finish the group one by one. Proceed to next batch immediately when it finishes.
 
 ### 2.3 Finalize
 
-Record each batch's branch, worktree-path, sessionId. 
+Record each batch's branch, worktree-path. 
 
-Report the continuation command `opencode {worktree-path} --session {sessionId}` immediately when each group's `opencode_run` finishes, then proceed to next group or report.
+Report the continuation command `opencode {worktree-path} --session {sessionId}` immediately when each group's `opencode run` finishes, then proceed to next group or report. (The sessionId can be found in the bash output.)
 
 ---
 
